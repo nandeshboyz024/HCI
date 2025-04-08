@@ -37,17 +37,17 @@ const styles = StyleSheet.create({
     marginBottom: 40,
   },
   button: {
-    backgroundColor: "#64B5F6",
+    backgroundColor: "#8F73E2",
     paddingVertical: 15,
     paddingHorizontal: 60,
     borderRadius: 8,
     marginVertical: 10,
-    width: 200,
+    width: 250,
     alignItems: "center",
   },
   buttonText: {
     fontSize: 20,
-    color: "#000",
-    fontWeight: "500",
+    color: "#fff",
+    fontWeight: "bold",
   },
 });

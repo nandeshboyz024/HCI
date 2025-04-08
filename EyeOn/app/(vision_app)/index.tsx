@@ -6,7 +6,7 @@ export default function Index() {
     <View style={styles.container}>
       <Text style={styles.title}>Login As</Text>
 
-      <Link href="/admin" asChild>
+      <Link href="/(vision_app)/(admin)" asChild>
         <TouchableOpacity style={styles.button}>
           <Text style={styles.buttonText}>Admin</Text>
         </TouchableOpacity>
@@ -35,7 +35,7 @@ const styles = StyleSheet.create({
     marginBottom: 40,
   },
   button: {
-    backgroundColor: "#64B5F6",
+    backgroundColor: "#8F73E2",
     paddingVertical: 15,
     paddingHorizontal: 60,
     borderRadius: 8,
@@ -45,7 +45,7 @@ const styles = StyleSheet.create({
   },
   buttonText: {
     fontSize: 20,
-    color: "#000",
-    fontWeight: "500",
+    color: "#fff",
+    fontWeight: "bold",
   },
 });
