@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, TextInput, Modal, Pressable } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
 
 export default function SchoolScreen() {
   const [modalVisible, setModalVisible] = useState(false);
+  const router = useRouter();
 
   return (
     <View style={styles.container}>
@@ -46,7 +48,13 @@ export default function SchoolScreen() {
             <TouchableOpacity style={styles.sheetButton}>
               <Text style={styles.sheetText}>Change Password</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.sheetButton}>
+            <TouchableOpacity
+              style={styles.sheetButton}
+              onPress={()=>{
+                setModalVisible(false);
+                router.replace("/");
+              }}
+            >
               <Text style={styles.sheetText}>Logout</Text>
             </TouchableOpacity>
           </View>

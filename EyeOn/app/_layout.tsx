@@ -1,14 +1,27 @@
-import { Stack } from "expo-router";
-import './global.css';
-export default function RootLayout() {
+import { Stack } from 'expo-router';
+
+export default function HomeLayout() {
   return (
-    <Stack>
-      <Stack.Screen
-        name="(vision_app)"
-        options={{
-          headerShown:false
-        }}
-      />
+    <Stack
+      screenOptions={{
+        headerStyle: {
+          backgroundColor: "text-primary",
+        },
+        headerTintColor: '#fff',
+        headerTitleStyle: {
+          fontWeight: 'bold',
+        }
+      }}>
+    <Stack.Screen
+      name="index"
+      options={{
+        title: "Vision App",
+        headerBackVisible: false, // 👈 hides the back arrow
+        gestureEnabled: false,    // 👈 disables back swipe on iOS
+      }}
+    />
+    <Stack.Screen name="(tester)" options={{ headerShown:false}}/>
+    <Stack.Screen name="(admin)" options={{ headerShown:false}}/>
     </Stack>
-  )
+  );
 }

@@ -1,18 +1,39 @@
+import React, { useCallback } from "react";
+import { Text, View, TouchableOpacity, StyleSheet, BackHandler, Alert, Platform } from "react-native";
 import { Link } from "expo-router";
-import { Text, View, TouchableOpacity, StyleSheet } from "react-native";
+import { useFocusEffect } from "@react-navigation/native";
 
 export default function Index() {
+  useFocusEffect(
+    useCallback(() => {
+      const backAction = () => {
+        if (Platform.OS === "android") {
+          Alert.alert("Exit App", "Are you sure you want to exit?", [
+            { text: "Cancel", style: "cancel" },
+            { text: "Exit", onPress: () => BackHandler.exitApp() },
+          ]);
+          return true;
+        }
+        return false;
+      };
+
+      const backHandler = BackHandler.addEventListener("hardwareBackPress", backAction);
+
+      return () => backHandler.remove();
+    }, [])
+  );
+
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Login As</Text>
 
-      <Link href="/(vision_app)/(admin)" asChild>
+      <Link href="/(admin)/login" asChild>
         <TouchableOpacity style={styles.button}>
           <Text style={styles.buttonText}>Admin</Text>
         </TouchableOpacity>
       </Link>
 
-      <Link href="/(vision_app)/(tester)" asChild>
+      <Link href="/(tester)/login" asChild>
         <TouchableOpacity style={styles.button}>
           <Text style={styles.buttonText}>Tester</Text>
         </TouchableOpacity>
@@ -20,6 +41,7 @@ export default function Index() {
     </View>
   );
 }
+
 
 const styles = StyleSheet.create({
   container: {

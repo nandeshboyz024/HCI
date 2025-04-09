@@ -1,6 +1,6 @@
 import { Stack } from 'expo-router';
 
-export default function TesterLayout() {
+export default function AdminLayout() {
   return (
     <Stack
       screenOptions={{
@@ -12,9 +12,8 @@ export default function TesterLayout() {
           fontWeight: 'bold',
         }
       }}>
-    <Stack.Screen name="index" options={{ title: "Tester" }}/>
-    <Stack.Screen name="primary" />
-    <Stack.Screen name="secondary"/>
+     <Stack.Screen name="login" options={{ title: "Admin" }}/>
+     <Stack.Screen name="schoolScreen" options={{ title: "Admin" }}/>
     </Stack>
   );
 }
