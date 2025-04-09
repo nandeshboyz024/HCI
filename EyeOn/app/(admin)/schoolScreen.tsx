@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, TextInput, Modal, Pressable } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-
+import { Link } from 'expo-router';
 export default function SchoolScreen() {
   const [modalVisible, setModalVisible] = useState(false);
   const router = useRouter();
@@ -45,9 +45,22 @@ export default function SchoolScreen() {
       >
         <Pressable style={styles.modalOverlay} onPress={() => setModalVisible(false)}>
           <View style={styles.bottomSheet}>
-            <TouchableOpacity style={styles.sheetButton}>
+            {/* <TouchableOpacity
+              style={styles.sheetButton}
+              onPress={()=>{
+                setModalVisible(false);
+                router.replace("/(admin)/changePassword");
+              }}
+            >
               <Text style={styles.sheetText}>Change Password</Text>
-            </TouchableOpacity>
+            </TouchableOpacity> */}
+
+            <Link href="/changePassword" asChild>
+                    <TouchableOpacity style={styles.sheetButton}>
+                      <Text style={styles.sheetText}>Change Password</Text>
+                    </TouchableOpacity>
+            </Link>
+
             <TouchableOpacity
               style={styles.sheetButton}
               onPress={()=>{
