@@ -45,21 +45,21 @@ export default function SchoolScreen() {
       >
         <Pressable style={styles.modalOverlay} onPress={() => setModalVisible(false)}>
           <View style={styles.bottomSheet}>
-            {/* <TouchableOpacity
-              style={styles.sheetButton}
-              onPress={()=>{
-                setModalVisible(false);
-                router.replace("/(admin)/changePassword");
-              }}
-            >
-              <Text style={styles.sheetText}>Change Password</Text>
-            </TouchableOpacity> */}
 
-            <Link href="/changePassword" asChild>
+            {/* <Link href="/changePassword" asChild>
                     <TouchableOpacity style={styles.sheetButton}>
                       <Text style={styles.sheetText}>Change Password</Text>
                     </TouchableOpacity>
-            </Link>
+            </Link> */}
+            <TouchableOpacity
+              style={styles.sheetButton}
+              onPress={() => {
+              setModalVisible(false); // close modal
+              router.push('/changePassword'); // navigate
+              }}
+            >
+            <Text style={styles.sheetText}>Change Password</Text>
+            </TouchableOpacity>
 
             <TouchableOpacity
               style={styles.sheetButton}
@@ -68,7 +68,7 @@ export default function SchoolScreen() {
                 router.replace("/");
               }}
             >
-              <Text style={styles.sheetText}>Logout</Text>
+            <Text style={styles.sheetText}>Logout</Text>
             </TouchableOpacity>
           </View>
         </Pressable>

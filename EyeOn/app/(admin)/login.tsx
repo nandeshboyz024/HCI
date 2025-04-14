@@ -7,12 +7,14 @@ import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from 'reac
 
 export default function AdminLogin() {
   const router = useRouter();
-  const [username, setUsername]= useState('');
-  const [password, setPassword] = useState('');
+  const [username, setUsername]= useState('nandeshboyz');
+  const [password, setPassword] = useState('12345678');
   
   const handleLogin = async()=>{
+    
     try{
       // const response = await fetch('http://localhost:5000/varify-admin',{
+
         const response = await fetch(`${API_URL}/varify-admin`, {
         method:'POST',
         headers:{

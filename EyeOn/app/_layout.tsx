@@ -20,7 +20,7 @@ export default function HomeLayout() {
         gestureEnabled: false,    // 👈 disables back swipe on iOS
       }}
     />
-    <Stack.Screen name="(tester)" options={{ headerShown:false}}/>
+    <Stack.Screen name="(screener)" options={{ headerShown:false}}/>
     <Stack.Screen name="(admin)" options={{ headerShown:false}}/>
     </Stack>
   );

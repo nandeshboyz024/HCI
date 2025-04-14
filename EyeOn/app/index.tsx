@@ -33,9 +33,9 @@ export default function Index() {
         </TouchableOpacity>
       </Link>
 
-      <Link href="/(tester)/login" asChild>
+      <Link href="/(screener)/login" asChild>
         <TouchableOpacity style={styles.button}>
-          <Text style={styles.buttonText}>Tester</Text>
+          <Text style={styles.buttonText}>Screener</Text>
         </TouchableOpacity>
       </Link>
     </View>
@@ -62,7 +62,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 60,
     borderRadius: 8,
     marginVertical: 10,
-    width: 200,
+    width: 250,
     alignItems: "center",
   },
   buttonText: {
