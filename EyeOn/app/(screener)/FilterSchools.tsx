@@ -5,13 +5,22 @@ import { useRouter } from 'expo-router';
 import { useEffect } from 'react';
 import { API_URL } from '@env';
 
+
+
+type DropdownItem = {
+  label: string;
+  value: string;
+  id?: number;
+};
+
 const FilterSchools = () => {
   const router = useRouter();
-  const [country, setCountry] = useState(null);
-  const [state, setState] = useState(null);
-  const [district, setDistrict] = useState(null);
-  const [taluk, setTaluk] = useState(null);
-  const [talukcode,setTalukcode]=useState(null);
+
+  const [country, setCountry] = useState<string | null>(null);
+  const [state, setState] = useState<string | null>(null);
+  const [district, setDistrict] = useState<string | null>(null);
+  const [taluk, setTaluk] = useState<string | null>(null);
+  const [talukcode, setTalukcode] = useState<number | null>(null);
 
   const [currentStep, setCurrentStep] = useState(1);
 
@@ -120,11 +129,10 @@ const FilterSchools = () => {
     }, [district]);
 
 
-  const handleCountryChange = (item) => {
+  const handleCountryChange = (item:DropdownItem) => {
     // const item = value;
     console.log("Selected country:", item.value);
 
-    setCountry(item.value);
     setCountry(item.value);
     setState(null);
     setDistrict(null);
@@ -138,7 +146,7 @@ const FilterSchools = () => {
     }
   };
 
-  const handleStateChange = (item) => {
+  const handleStateChange = (item:DropdownItem) => {
     setState(item.value);
     setDistrict(null);
     setTaluk(null);
@@ -151,7 +159,7 @@ const FilterSchools = () => {
     }
   };
 
-  const handleDistrictChange = (item) => {
+  const handleDistrictChange = (item:DropdownItem) => {
     setDistrict(item.value);
     setTaluk(null);
     setTalukcode(null);
@@ -163,9 +171,9 @@ const FilterSchools = () => {
     }
   };
 
-  const handleTalukChange = (item) => {
+  const handleTalukChange = (item:DropdownItem) => {
     setTaluk(item.value);
-    setTalukcode(item.id);
+    if(item.id) setTalukcode(item.id);
     if (item.value) {
       setCurrentStep(5);
     }
