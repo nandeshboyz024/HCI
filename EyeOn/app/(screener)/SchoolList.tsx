@@ -8,7 +8,6 @@ const SchoolList = () => {
   const [selectedSchool, setSelectedSchool] = useState(null);
 
   console.log(country, state, district, taluk);
-  console.log("ha ha");
 
   if (!country || !state || !district || !taluk) {
     return (

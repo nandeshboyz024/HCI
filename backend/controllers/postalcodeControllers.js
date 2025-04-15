@@ -72,14 +72,15 @@ export const getTaluks = async (req, res) => {
   try {
     const { Country, State, District } = req.body;
     const result = await sql`
-      SELECT DISTINCT "Taluk"
+      SELECT DISTINCT "Taluk","pk"
       FROM "Postalcodes"
       WHERE "Country" = ${Country}
         AND "State" = ${State}
         AND "District" = ${District}
       ORDER BY "Taluk"
     `;
-    const taluks = result.map(row => row.Taluk).filter(Boolean);
+    const taluks = result.map(row => [row.Taluk,row.pk]).filter(Boolean);
+
     res.json({
       success: true,
       data: taluks
