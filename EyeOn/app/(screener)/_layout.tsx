@@ -15,6 +15,10 @@ export default function TesterLayout() {
     {/* <Stack.Screen name="login" options={{ title: "Tester" }}/> */}
     <Stack.Screen name="FilterSchools" options={{ title: "Filter Schools" }}/>
     <Stack.Screen name="SchoolList" options={{ title: "Select School" }}/>
+    
+    <Stack.Screen name="SelectedSchools" options={{ title: "Selected Schools" }}/>
+    {/* <Stack.Screen name="SchoolDetails" options={{ title: "School Details" }}/> */}
+    
     {/* <Stack.Screen name="secondary"/> */}
     </Stack>
   );
