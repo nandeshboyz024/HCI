@@ -11,12 +11,15 @@ const FilterSchools = () => {
   const [state, setState] = useState(null);
   const [district, setDistrict] = useState(null);
   const [taluk, setTaluk] = useState(null);
+  const [talukcode,setTalukcode]=useState(null);
+
   const [currentStep, setCurrentStep] = useState(1);
 
   const [countries, setCountries] = useState([]);
   const [states, setStates] = useState([]);
   const [districts, setDistricts] = useState([]);
-  const [taluks, setTaluks] = useState([]);
+  const [taluks, setTaluks] = useState<[string, number][]>([]);
+  
 
   useEffect(() => {
       const fetchCountries = async () => {
@@ -58,6 +61,7 @@ const FilterSchools = () => {
       setState(null);
       setDistrict(null);
       setTaluk(null);
+      setTalukcode(null);
       setStates([]);
       setDistricts([]);
       setTaluks([]);
@@ -84,6 +88,7 @@ const FilterSchools = () => {
       };
       setDistrict(null);
       setTaluk(null);
+      setTalukcode(null);
       setDistricts([]);
       setTaluks([]);
       fetchDistricts();
@@ -109,58 +114,11 @@ const FilterSchools = () => {
       };
   
       setTaluk(null);
+      setTalukcode(null);
       setTaluks([]);
       fetchTaluks();
     }, [district]);
 
-
-
-  // const countries = ['India', 'USA', 'Canada']; // Example data
-  // const states = {
-  //   India: ['Karnataka', 'Maharashtra', 'Tamil Nadu'],
-  //   USA: ['California', 'Texas', 'New York'],
-  //   Canada: ['Ontario', 'British Columbia', 'Quebec'],
-  // };
-  // const districts = {
-  //   Karnataka: ['Bangalore', 'Mysore', 'Hubli'],
-  //   Maharashtra: ['Mumbai', 'Pune', 'Nagpur'],
-  //   TamilNadu: ['Chennai', 'Coimbatore', 'Madurai'],
-  //   California: ['Los Angeles', 'San Diego', 'San Jose'],
-  //   Texas: ['Houston', 'Dallas', 'Austin'],
-  //   NewYork: ['New York City', 'Buffalo', 'Rochester'],
-  //   Ontario: ['Toronto', 'Ottawa', 'Hamilton'],
-  //   BritishColumbia: ['Vancouver', 'Victoria', 'Kelowna'],
-  //   Quebec: ['Montreal', 'Quebec City', 'Gatineau'],
-  // };
-  // const taluks = {
-  //   Bangalore: ['Yelahanka', 'Devanahalli', 'Hoskote'],
-  //   Mysore: ['Nanjangud', 'T.Narsipur', 'H.D.Kote'],
-  //   Hubli: ['Dharwad', 'Navalgund', 'Ron'],
-  //   Mumbai: ['Andheri', 'Bandra', 'Chembur'],
-  //   Pune: ['Hadapsar', 'Kothrud', 'Shivajinagar'],
-  //   Nagpur: ['Kamptee', 'Katol', 'Saoner'],
-  //   Chennai: ['Ambattur', 'Ayanavaram', 'Guindy'],
-  //   Coimbatore: ['Pollachi', 'Mettupalayam', 'Perur'],
-  //   Madurai: ['Melur', 'Thirumangalam', 'Usilampatti'],
-  //   LosAngeles: ['Santa Monica', 'Beverly Hills', 'Hollywood'],
-  //   SanDiego: ['La Jolla', 'Chula Vista', 'Carlsbad'],
-  //   SanJose: ['Sunnyvale', 'Santa Clara', 'Cupertino'],
-  //   Houston: ['Pasadena', 'Baytown', 'Deer Park'],
-  //   Dallas: ['Plano', 'Irving', 'Garland'],
-  //   Austin: ['Round Rock', 'Cedar Park', 'Georgetown'],
-  //   NewYorkCity: ['Manhattan', 'Brooklyn', 'Queens'],
-  //   Buffalo: ['Amherst', 'Cheektowaga', 'Tonawanda'],
-  //   Rochester: ['Greece', 'Irondequoit', 'Brighton'],
-  //   Toronto: ['Mississauga', 'Brampton', 'Scarborough'],
-  //   Ottawa: ['Gatineau', 'Nepean', 'Kanata'],
-  //   Hamilton: ['Burlington', 'Stoney Creek', 'Ancaster'],
-  //   Vancouver: ['Surrey', 'Burnaby', 'Richmond'],
-  //   Victoria: ['Saanich', 'Langford', 'Colwood'],
-  //   Kelowna: ['West Kelowna', 'Lake Country', 'Peachland'],
-  //   Montreal: ['Laval', 'Longueuil', 'Terrebonne'],
-  //   QuebecCity: ['Lévis', 'Sainte-Foy', 'Beauport'],
-  //   Gatineau: ['Hull', 'Aylmer', 'Buckingham'],
-  // };
 
   const handleCountryChange = (item) => {
     // const item = value;
@@ -171,6 +129,7 @@ const FilterSchools = () => {
     setState(null);
     setDistrict(null);
     setTaluk(null);
+    setTalukcode(null);
     if (item.value) {
       setCurrentStep(2);
     }
@@ -183,6 +142,7 @@ const FilterSchools = () => {
     setState(item.value);
     setDistrict(null);
     setTaluk(null);
+    setTalukcode(null);
     if (item.value) {
       setCurrentStep(3);
     }
@@ -194,6 +154,7 @@ const FilterSchools = () => {
   const handleDistrictChange = (item) => {
     setDistrict(item.value);
     setTaluk(null);
+    setTalukcode(null);
     if (item.value) {
       setCurrentStep(4);
     }
@@ -204,6 +165,7 @@ const FilterSchools = () => {
 
   const handleTalukChange = (item) => {
     setTaluk(item.value);
+    setTalukcode(item.id);
     if (item.value) {
       setCurrentStep(5);
     }
@@ -230,7 +192,7 @@ const FilterSchools = () => {
       return;
     }
 
-    console.log(country, state, district, taluk);
+    console.log(country, state, district, taluk, talukcode);
     router.push({
       pathname: '/SchoolList',
       params: {
@@ -238,6 +200,7 @@ const FilterSchools = () => {
         state,
         district,
         taluk,
+        talukcode
       },
     });
   };
@@ -316,7 +279,7 @@ const FilterSchools = () => {
             selectedTextStyle={styles.selectedTextStyle}
             inputSearchStyle={styles.inputSearchStyle}
             iconStyle={styles.iconStyle}
-            data={taluks?.map((taluk) => ({ label: taluk, value: taluk })) || []}
+            data={taluks?.map(([name,id]) => ({ label: name, value: name,id})) || []}
             search
             maxHeight={300}
             labelField="label"

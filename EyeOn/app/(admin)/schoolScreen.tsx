@@ -15,11 +15,12 @@ export default function SchoolScreen() {
   const [state, setState] = useState(null);
   const [district, setDistrict] = useState(null);
   const [taluk, setTaluk] = useState(null);
+  const [talukcode,setTalukcode]=useState(null);
 
   const [countries, setCountries] = useState([]);
   const [states, setStates] = useState([]);
   const [districts, setDistricts] = useState([]);
-  const [taluks, setTaluks] = useState([]);
+  const [taluks, setTaluks] = useState<[string, number][]>([]);
   const [currentStep, setCurrentStep] = useState(1);
 
   // Fetch countries on initial load
@@ -63,6 +64,7 @@ export default function SchoolScreen() {
     setState(null);
     setDistrict(null);
     setTaluk(null);
+    setTalukcode(null);
     setStates([]);
     setDistricts([]);
     setTaluks([]);
@@ -89,6 +91,7 @@ export default function SchoolScreen() {
     };
     setDistrict(null);
     setTaluk(null);
+    setTalukcode(null);
     setDistricts([]);
     setTaluks([]);
     fetchDistricts();
@@ -114,13 +117,14 @@ export default function SchoolScreen() {
     };
 
     setTaluk(null);
+    setTalukcode(null);
     setTaluks([]);
     fetchTaluks();
   }, [district]);
 
   const handleNext = () => {
     // handle navigation or data submission
-    console.log({ country, state, district, taluk });
+    console.log({ country, state, district, taluk, talukcode});
   };
 
   const handleCountryChange = (item) => {
@@ -132,6 +136,7 @@ export default function SchoolScreen() {
     setState(null);
     setDistrict(null);
     setTaluk(null);
+    setTalukcode(null);
     if (item.value) {
       setCurrentStep(2);
     }
@@ -144,6 +149,7 @@ export default function SchoolScreen() {
     setState(item.value);
     setDistrict(null);
     setTaluk(null);
+    setTalukcode(null);
     if (item.value) {
       setCurrentStep(3);
     }
@@ -155,6 +161,7 @@ export default function SchoolScreen() {
   const handleDistrictChange = (item) => {
     setDistrict(item.value);
     setTaluk(null);
+    setTalukcode(null);
     if (item.value) {
       setCurrentStep(4);
     }
@@ -165,6 +172,7 @@ export default function SchoolScreen() {
 
   const handleTalukChange = (item) => {
     setTaluk(item.value);
+    setTalukcode(item.id)
     if (item.value) {
       setCurrentStep(5);
     }
@@ -172,71 +180,6 @@ export default function SchoolScreen() {
       setCurrentStep(4);      
     }
   };
-
-  // const handleNext = () => {
-  //   if (!country) {
-  //     Alert.alert('Error', 'Please select a country');
-  //     return;
-  //   }
-  //   if (!state) {
-  //     Alert.alert('Error', 'Please select a state');
-  //     return;
-  //   }
-  //   if (!district) {
-  //     Alert.alert('Error', 'Please select a district');
-  //     return;
-  //   }
-  //   if (!taluk) {
-  //     Alert.alert('Error', 'Please select a taluk');
-  //     return;
-  //   }
-
-  //   console.log(country, state, district, taluk);
-  //   router.push({
-  //     pathname: '/SchoolList',
-  //     params: {
-  //       country,
-  //       state,
-  //       district,
-  //       taluk,
-  //     },
-  //   });
-  // };
-
-//   return (
-//     <View style={styles.container}>
-//       <Text style={styles.header}>Filter Schools</Text>
-
-//       <RNPickerSelect
-//         onValueChange={value => setCountry(value)}
-//         items={countries?.map(country => ({ label: country, value: country }))}
-//         placeholder={{ label: 'Select Country', value: null }}
-//       />
-//       {country && (
-//         <RNPickerSelect
-//           onValueChange={(value) => setState(value)}
-//           items={states?.map(state => ({ label: state, value: state }))}
-//           placeholder={{ label: 'Select State', value: null }}
-//         />
-//       )}
-//       {state && (
-//         <RNPickerSelect
-//           onValueChange={(value) => setDistrict(value)}
-//           items={districts?.map(district => ({ label: district, value: district }))}
-//           placeholder={{ label: 'Select District', value: null }}
-//         />
-//       )}
-//       {district && (
-//         <RNPickerSelect
-//           onValueChange={(value) => setTaluk(value)}
-//           items={taluks?.map(taluk => ({ label: taluk, value: taluk }))}
-//           placeholder={{ label: 'Select Taluk', value: null }}
-//         />
-//       )}
-//     </View>
-//   );
-// }
-
 
 return (
   <View style={styles.container}>
@@ -312,7 +255,8 @@ return (
           selectedTextStyle={styles.selectedTextStyle}
           inputSearchStyle={styles.inputSearchStyle}
           iconStyle={styles.iconStyle}
-          data={taluks?.map((taluk) => ({ label: taluk, value: taluk })) || []}
+          // data={taluks?.map((item) => ({ label: item.Taluk, value: item.Taluk })) || []}
+          data={taluks.map(([name, id]) => ({ label: name, value: name, id}))}
           search
           maxHeight={300}
           labelField="label"
@@ -325,15 +269,17 @@ return (
       </View>
     )}
     {currentStep === 5 && (
-      <View>
-      <TouchableOpacity style={styles.button} onPress={handleNext}>
-        <Text style={styles.buttonText}>View Schools</Text>
-      </TouchableOpacity>
-      <Text style={{alignSelf:'center'}}>Or</Text>
-      <TouchableOpacity style={styles.button} onPress={handleNext}>
-        <Text style={styles.buttonText}>Add School</Text>
-      </TouchableOpacity>
+      <View style={{ alignItems: 'center' }}>
+        <View style={{ flexDirection: 'row', justifyContent: 'space-between', width: '100%' }}>
+          <TouchableOpacity style={styles.button} onPress={handleNext}>
+            <Text style={styles.buttonText}>Add School</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.button} onPress={handleNext}>
+            <Text style={styles.buttonText}>View School</Text>
+          </TouchableOpacity>
+        </View>
       </View>
+
     )}
        {/* Bottom Navigation */}
        <View style={styles.bottomNav}>
@@ -421,15 +367,15 @@ const styles = StyleSheet.create({
   button: {
     alignSelf:'center',
     backgroundColor: "#8F73E2",
-    paddingVertical: 15,
-    paddingHorizontal: 60,
+    paddingVertical: 10,
+    paddingHorizontal: 20,
     borderRadius: 8,
     marginVertical: 10,
-    width: 250,
+    width: 140,
     alignItems: "center",
   },
   buttonText: {
-    fontSize: 20,
+    fontSize: 15,
     color: "#fff",
     fontWeight: "bold",
   },
