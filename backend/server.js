@@ -2,6 +2,7 @@
 import express from "express";
 import cors from "cors";
 import adminRoutes from "./routes/adminRoutes.js";
+import postalcodeRoutes from "./routes/postalcodeRoutes.js";
 
 const app = express();
 
@@ -11,6 +12,7 @@ app.use(express.json());
 
 // Mount routes
 app.use("/", adminRoutes);
+app.use("/",postalcodeRoutes);
 
 app.listen(5000, () => {
   console.log("Server is working on http://localhost:5000");
