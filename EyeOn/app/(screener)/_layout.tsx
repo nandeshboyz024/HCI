@@ -12,9 +12,10 @@ export default function TesterLayout() {
           fontWeight: 'bold',
         }
       }}>
-    <Stack.Screen name="login" options={{ title: "Screener" }}/>
-    <Stack.Screen name="primary" options={{title:"Primary Screener"}} />
-    <Stack.Screen name="secondary" options={{title:"Secondary Screener"}}/>
+    {/* <Stack.Screen name="login" options={{ title: "Tester" }}/> */}
+    <Stack.Screen name="FilterSchools" options={{ title: "Filter Schools" }}/>
+    <Stack.Screen name="SchoolList" options={{ title: "Select School" }}/>
+    {/* <Stack.Screen name="secondary"/> */}
     </Stack>
   );
 }

@@ -33,7 +33,7 @@ export default function Index() {
         </TouchableOpacity>
       </Link>
 
-      <Link href="/(screener)/login" asChild>
+      <Link href="/(screener)/FilterSchools" asChild>
         <TouchableOpacity style={styles.button}>
           <Text style={styles.buttonText}>Screener</Text>
         </TouchableOpacity>
