@@ -1,11 +1,44 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect} from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
-import { router, useLocalSearchParams } from 'expo-router';
+import { useLocalSearchParams } from 'expo-router';
 import { Dropdown } from 'react-native-element-dropdown';
+import { API_URL } from '@env';
+import { useRouter } from 'expo-router';
 
-const SchoolList = () => {
+type SchoolItem = {
+    label: string;
+    value: string;
+    code: number;
+};
+
+export default function SearchSchool(){
+  const router = useRouter();
   const { country, state, district, taluk, talukcode, postalcode} = useLocalSearchParams();
-  const [selectedSchool, setSelectedSchool] = useState(null);
+  const [schoolName, setSchoolName] = useState<string|null>(null);
+  const [schoolpk,setSchoolpk] = useState<number|null>(null);
+
+  const [schools, setSchools] = useState<[number, string][]>([]);
+
+  useEffect(() => {
+      const fetchSchools = async () => {
+        try {
+          const response = await fetch(`${API_URL}/get-schools`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({postalcodepk: talukcode})
+          });
+          const res = await response.json();
+          if(res.success){
+            setSchools(res.data);
+          }
+        } catch (err) {
+          console.error("Error fetching countries:", err);
+        }
+      };
+      fetchSchools();
+    }, []);
+
+
 
   console.log(country, state, district, taluk, talukcode, postalcode);
 
@@ -17,34 +50,22 @@ const SchoolList = () => {
     );
   }
 
-  console.log("me yanah hu ");
-
-  // Example data: List of schools based on the selected filters
-  const schools = [
-    { name: 'School 1', location: `${taluk}, ${district}, ${state}, ${country}` },
-    { name: 'School 2', location: `${taluk}, ${district}, ${state}, ${country}` },
-    // Add more schools as needed
-  ];
-
-  const handleSchoolSelect = (value) => {
-    setSelectedSchool(value);
+  const handleSchoolChange = (item:SchoolItem) => {
+    setSchoolName(item.value);
+    setSchoolpk(item.code);
   };
 
   const handleGoToSchool = () => {
-    if (selectedSchool) {
-      // Navigate to the selected school or perform any other action
-      router.push({
-        pathname: '/(screener)/selectedSchools',
-        params: {
-          country,
-          state,
-          district,
-          taluk,
-          selectedSchool,
-        },
-      });
-      
-      console.log(`Navigating to ${selectedSchool}`);
+    if (schoolpk) {
+        router.push({
+            pathname: '/schoolDetails',
+            params: {
+              schoolName,
+              schoolpk,
+              taluk,
+              postalcode
+            },
+          });
     } else {
       console.log('Please select a school first');
     }
@@ -66,17 +87,15 @@ const SchoolList = () => {
           selectedTextStyle={styles.selectedTextStyle}
           inputSearchStyle={styles.inputSearchStyle}
           iconStyle={styles.iconStyle}
-          data={schools.map((school) => ({ label: school.name, value: school.name }))}
+          data={schools.map(([code,name]) => ({ label: name, value: name,code}))}
           search
           maxHeight={300}
           labelField="label"
           valueField="value"
           placeholder="Select a School"
           searchPlaceholder="Search..."
-          value={selectedSchool}
-          onChange={item => {
-            handleSchoolSelect(item.value);
-          }}
+          value={schoolName}
+          onChange={handleSchoolChange}
         />
         <TouchableOpacity style={styles.button} onPress={handleGoToSchool}>
           <Text style={styles.buttonText}>Go to School</Text>
@@ -103,18 +122,19 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   button: {
-    width: 150, // Adjust the width as needed
-    height: 40, // Adjust the height as needed
-    backgroundColor: '#007AFF', // Customize button color
-    borderRadius: 10, // Apply border radius
-    justifyContent: 'center',
-    alignItems: 'center',
-    alignSelf: 'center', // Center the button horizontally
-    marginTop: 20,
+    alignSelf:'center',
+    backgroundColor: "#8F73E2",
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 8,
+    marginVertical: 10,
+    width: 200,
+    alignItems: "center",
   },
   buttonText: {
-    color: '#fff',
-    fontSize: 16,
+    fontSize: 20,
+    color: "#fff",
+    fontWeight: "bold",
   },
   dropdown: {
     margin: 16,
@@ -147,4 +167,3 @@ const styles = StyleSheet.create({
   },
 });
 
-export default SchoolList;

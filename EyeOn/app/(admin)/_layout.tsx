@@ -15,6 +15,8 @@ export default function AdminLayout() {
      <Stack.Screen name="login" options={{ title: "Admin" }}/>
      <Stack.Screen name="schoolScreen" options={{ title: "Admin" }}/>
      <Stack.Screen name="changePassword" options={{title:"Change Password"}}/>
+     <Stack.Screen name="searchSchool" options={{title:"Admin"}}/>
+     <Stack.Screen name="schoolDetails" options={{title:"Admin"}}/>
     </Stack>
   );
 }

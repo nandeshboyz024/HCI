@@ -11,6 +11,7 @@ type DropdownItem = {
   label: string;
   value: string;
   id?: number;
+  postalcode?:string;
 };
 
 const FilterSchools = () => {
@@ -20,15 +21,16 @@ const FilterSchools = () => {
   const [state, setState] = useState<string | null>(null);
   const [district, setDistrict] = useState<string | null>(null);
   const [taluk, setTaluk] = useState<string | null>(null);
-
   const [talukcode, setTalukcode] = useState<number | null>(null);
+  const [postalcode, setPostalcode] = useState<string | null>(null);
 
   const [currentStep, setCurrentStep] = useState(1);
 
   const [countries, setCountries] = useState([]);
   const [states, setStates] = useState([]);
   const [districts, setDistricts] = useState([]);
-  const [taluks, setTaluks] = useState<[string, number][]>([]);
+  const [taluks, setTaluks] = useState<[string, number, string][]>([]);
+  
 
   useEffect(() => {
       const fetchCountries = async () => {
@@ -70,6 +72,8 @@ const FilterSchools = () => {
       setState(null);
       setDistrict(null);
       setTaluk(null);
+      setTalukcode(null);
+      setPostalcode(null);
       setStates([]);
       setDistricts([]);
       setTaluks([]);
@@ -96,86 +100,41 @@ const FilterSchools = () => {
       };
       setDistrict(null);
       setTaluk(null);
+      setTalukcode(null);
+      setPostalcode(null);
       setDistricts([]);
       setTaluks([]);
       fetchDistricts();
     }, [state]);
   
-  useEffect(() => {
-    if (!country || !state || !district) return;
-
-    const fetchTaluks = async () => {
-      try {
-        const response = await fetch(`${API_URL}/get-taluks`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ Country: country, State: state, District: district })
-        });
-        const res = await response.json();
-        if(res.success){
-          setTaluks(res.data);
+    useEffect(() => {
+      if (!country || !state || !district) return;
+  
+      const fetchTaluks = async () => {
+        try {
+          const response = await fetch(`${API_URL}/get-taluks`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ Country: country, State: state, District: district })
+          });
+          const res = await response.json();
+          if(res.success){
+            setTaluks(res.data);
+          }
+        } catch (err) {
+          console.error("Error fetching taluks:", err);
         }
-      } catch (err) {
-        console.error("Error fetching taluks:", err);
-      }
-    };
-
-    setTaluk(null);
-    setTalukcode(null);
-    setTaluks([]);
-    fetchTaluks();
-  }, [district]);
+      };
+  
+      setTaluk(null);
+      setTalukcode(null);
+      setPostalcode(null);
+      setTaluks([]);
+      fetchTaluks();
+    }, [district]);
 
 
-
-  // const countries = ['India', 'USA', 'Canada']; // Example data
-  // const states = {
-  //   India: ['Karnataka', 'Maharashtra', 'Tamil Nadu'],
-  //   USA: ['California', 'Texas', 'New York'],
-  //   Canada: ['Ontario', 'British Columbia', 'Quebec'],
-  // };
-  // const districts = {
-  //   Karnataka: ['Bangalore', 'Mysore', 'Hubli'],
-  //   Maharashtra: ['Mumbai', 'Pune', 'Nagpur'],
-  //   TamilNadu: ['Chennai', 'Coimbatore', 'Madurai'],
-  //   California: ['Los Angeles', 'San Diego', 'San Jose'],
-  //   Texas: ['Houston', 'Dallas', 'Austin'],
-  //   NewYork: ['New York City', 'Buffalo', 'Rochester'],
-  //   Ontario: ['Toronto', 'Ottawa', 'Hamilton'],
-  //   BritishColumbia: ['Vancouver', 'Victoria', 'Kelowna'],
-  //   Quebec: ['Montreal', 'Quebec City', 'Gatineau'],
-  // };
-  // const taluks = {
-  //   Bangalore: ['Yelahanka', 'Devanahalli', 'Hoskote'],
-  //   Mysore: ['Nanjangud', 'T.Narsipur', 'H.D.Kote'],
-  //   Hubli: ['Dharwad', 'Navalgund', 'Ron'],
-  //   Mumbai: ['Andheri', 'Bandra', 'Chembur'],
-  //   Pune: ['Hadapsar', 'Kothrud', 'Shivajinagar'],
-  //   Nagpur: ['Kamptee', 'Katol', 'Saoner'],
-  //   Chennai: ['Ambattur', 'Ayanavaram', 'Guindy'],
-  //   Coimbatore: ['Pollachi', 'Mettupalayam', 'Perur'],
-  //   Madurai: ['Melur', 'Thirumangalam', 'Usilampatti'],
-  //   LosAngeles: ['Santa Monica', 'Beverly Hills', 'Hollywood'],
-  //   SanDiego: ['La Jolla', 'Chula Vista', 'Carlsbad'],
-  //   SanJose: ['Sunnyvale', 'Santa Clara', 'Cupertino'],
-  //   Houston: ['Pasadena', 'Baytown', 'Deer Park'],
-  //   Dallas: ['Plano', 'Irving', 'Garland'],
-  //   Austin: ['Round Rock', 'Cedar Park', 'Georgetown'],
-  //   NewYorkCity: ['Manhattan', 'Brooklyn', 'Queens'],
-  //   Buffalo: ['Amherst', 'Cheektowaga', 'Tonawanda'],
-  //   Rochester: ['Greece', 'Irondequoit', 'Brighton'],
-  //   Toronto: ['Mississauga', 'Brampton', 'Scarborough'],
-  //   Ottawa: ['Gatineau', 'Nepean', 'Kanata'],
-  //   Hamilton: ['Burlington', 'Stoney Creek', 'Ancaster'],
-  //   Vancouver: ['Surrey', 'Burnaby', 'Richmond'],
-  //   Victoria: ['Saanich', 'Langford', 'Colwood'],
-  //   Kelowna: ['West Kelowna', 'Lake Country', 'Peachland'],
-  //   Montreal: ['Laval', 'Longueuil', 'Terrebonne'],
-  //   QuebecCity: ['Lévis', 'Sainte-Foy', 'Beauport'],
-  //   Gatineau: ['Hull', 'Aylmer', 'Buckingham'],
-  // };
-
-  const handleCountryChange = (item) => {
+  const handleCountryChange = (item:DropdownItem) => {
     // const item = value;
     console.log("Selected country:", item.value);
 
@@ -184,6 +143,7 @@ const FilterSchools = () => {
     setDistrict(null);
     setTaluk(null);
     setTalukcode(null);
+    setPostalcode(null);
     if (item.value) {
       setCurrentStep(2);
     }
@@ -197,6 +157,7 @@ const FilterSchools = () => {
     setDistrict(null);
     setTaluk(null);
     setTalukcode(null);
+    setPostalcode(null);
     if (item.value) {
       setCurrentStep(3);
     }
@@ -209,6 +170,7 @@ const FilterSchools = () => {
     setDistrict(item.value);
     setTaluk(null);
     setTalukcode(null);
+    setPostalcode(null);
     if (item.value) {
       setCurrentStep(4);
     }
@@ -220,6 +182,7 @@ const FilterSchools = () => {
   const handleTalukChange = (item:DropdownItem) => {
     setTaluk(item.value);
     if(item.id) setTalukcode(item.id);
+    if(item.postalcode) setPostalcode(item.postalcode);
     if (item.value) {
       setCurrentStep(5);
     }
@@ -246,7 +209,7 @@ const FilterSchools = () => {
       return;
     }
 
-    console.log(country, state, district, taluk, talukcode);
+    console.log(country, state, district, taluk, talukcode, postalcode);
     router.push({
       pathname: '/SchoolList',
       params: {
@@ -254,7 +217,8 @@ const FilterSchools = () => {
         state,
         district,
         taluk,
-        talukcode
+        talukcode,
+        postalcode
       },
     });
   };
@@ -270,7 +234,7 @@ const FilterSchools = () => {
             selectedTextStyle={styles.selectedTextStyle}
             inputSearchStyle={styles.inputSearchStyle}
             iconStyle={styles.iconStyle}
-            data={countries?.map((country) => ({ label: country, value: country }))}
+            data={countries.map((country) => ({ label: country, value: country }))}
             search
             maxHeight={300}
             labelField="label"
@@ -291,9 +255,7 @@ const FilterSchools = () => {
             selectedTextStyle={styles.selectedTextStyle}
             inputSearchStyle={styles.inputSearchStyle}
             iconStyle={styles.iconStyle}
-            // data={states[country]?.map((state) => ({ label: state, value: state })) || []}
             data={states?.map((state) => ({ label: state, value: state })) || []}
-
             search
             maxHeight={300}
             labelField="label"
@@ -315,8 +277,6 @@ const FilterSchools = () => {
             inputSearchStyle={styles.inputSearchStyle}
             iconStyle={styles.iconStyle}
             data={districts?.map((district) => ({ label: district, value: district })) || []}
-            // data={districts[state]?.map((district) => ({ label: district, value: district })) || []}
-
             search
             maxHeight={300}
             labelField="label"
@@ -337,10 +297,7 @@ const FilterSchools = () => {
             selectedTextStyle={styles.selectedTextStyle}
             inputSearchStyle={styles.inputSearchStyle}
             iconStyle={styles.iconStyle}
-            // data={taluks[district]?.map((taluk) => ({ label: taluk, value: taluk })) || []}
-            // data={taluks?.map((taluk) => ({ label: taluk, value: taluk })) || []}
-            data={taluks.map(([name, id]) => ({ label: name, value: name, id}))}
-
+            data={taluks?.map(([name,id,postalcode]) => ({ label: name, value: name,id,postalcode})) || []}
             search
             maxHeight={300}
             labelField="label"
