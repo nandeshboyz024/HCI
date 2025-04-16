@@ -11,6 +11,7 @@ type DropdownItem = {
   label: string;
   value: string;
   id?: number;
+  postalcode?:string;
 };
 
 export default function SchoolScreen() {
@@ -22,12 +23,12 @@ export default function SchoolScreen() {
   const [district, setDistrict] = useState<string | null>(null);
   const [taluk, setTaluk] = useState<string | null>(null);
   const [talukcode, setTalukcode] = useState<number | null>(null);
-
+  const [postalcode, setPostalcode] = useState<string | null>(null);  
 
   const [countries, setCountries] = useState([]);
   const [states, setStates] = useState([]);
   const [districts, setDistricts] = useState([]);
-  const [taluks, setTaluks] = useState<[string, number][]>([]);
+  const [taluks, setTaluks] = useState<[string, number, string][]>([]);
   const [currentStep, setCurrentStep] = useState(1);
 
   // Fetch countries on initial load
@@ -72,6 +73,7 @@ export default function SchoolScreen() {
     setDistrict(null);
     setTaluk(null);
     setTalukcode(null);
+    setPostalcode(null);
     setStates([]);
     setDistricts([]);
     setTaluks([]);
@@ -99,6 +101,7 @@ export default function SchoolScreen() {
     setDistrict(null);
     setTaluk(null);
     setTalukcode(null);
+    setPostalcode(null);
     setDistricts([]);
     setTaluks([]);
     fetchDistricts();
@@ -125,14 +128,12 @@ export default function SchoolScreen() {
 
     setTaluk(null);
     setTalukcode(null);
+    setPostalcode(null);
     setTaluks([]);
     fetchTaluks();
   }, [district]);
 
-  const handleNext = () => {
-    // handle navigation or data submission
-    console.log({ country, state, district, taluk, talukcode});
-  };
+  
 
   const handleCountryChange = (item: DropdownItem) => {
     // const item = value;
@@ -144,6 +145,7 @@ export default function SchoolScreen() {
     setDistrict(null);
     setTaluk(null);
     setTalukcode(null);
+    setPostalcode(null);
     if (item.value) {
       setCurrentStep(2);
     }
@@ -157,6 +159,7 @@ export default function SchoolScreen() {
     setDistrict(null);
     setTaluk(null);
     setTalukcode(null);
+    setPostalcode(null);
     if (item.value) {
       setCurrentStep(3);
     }
@@ -169,6 +172,7 @@ export default function SchoolScreen() {
     setDistrict(item.value);
     setTaluk(null);
     setTalukcode(null);
+    setPostalcode(null);
     if (item.value) {
       setCurrentStep(4);
     }
@@ -180,6 +184,7 @@ export default function SchoolScreen() {
   const handleTalukChange = (item:DropdownItem) => {
     setTaluk(item.value);
     if(item.id) setTalukcode(item.id)
+    if(item.postalcode) setPostalcode(item.postalcode);
     if (item.value) {
       setCurrentStep(5);
     }
@@ -187,6 +192,38 @@ export default function SchoolScreen() {
       setCurrentStep(4);      
     }
   };
+
+    const handleNext = () => {
+      if (!country) {
+        Alert.alert('Error', 'Please select a country');
+        return;
+      }
+      if (!state) {
+        Alert.alert('Error', 'Please select a state');
+        return;
+      }
+      if (!district) {
+        Alert.alert('Error', 'Please select a district');
+        return;
+      }
+      if (!taluk) {
+        Alert.alert('Error', 'Please select a taluk');
+        return;
+      }
+  
+      console.log(country, state, district, taluk, talukcode);
+      router.push({
+        pathname: '/searchSchool',
+        params: {
+          country,
+          state,
+          district,
+          taluk,
+          talukcode,
+          postalcode
+        },
+      });
+    };
 
 return (
   <View style={styles.container}>
@@ -263,7 +300,7 @@ return (
           inputSearchStyle={styles.inputSearchStyle}
           iconStyle={styles.iconStyle}
           // data={taluks?.map((item) => ({ label: item.Taluk, value: item.Taluk })) || []}
-          data={taluks.map(([name, id]) => ({ label: name, value: name, id}))}
+          data={taluks.map(([name, id, postalcode]) => ({ label: name, value: name, id, postalcode}))}
           search
           maxHeight={300}
           labelField="label"
@@ -286,7 +323,6 @@ return (
           </TouchableOpacity>
         </View>
       </View>
-
     )}
        {/* Bottom Navigation */}
        <View style={styles.bottomNav}>

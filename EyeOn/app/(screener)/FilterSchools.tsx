@@ -11,6 +11,7 @@ type DropdownItem = {
   label: string;
   value: string;
   id?: number;
+  postalcode?:string;
 };
 
 const FilterSchools = () => {
@@ -21,13 +22,14 @@ const FilterSchools = () => {
   const [district, setDistrict] = useState<string | null>(null);
   const [taluk, setTaluk] = useState<string | null>(null);
   const [talukcode, setTalukcode] = useState<number | null>(null);
+  const [postalcode, setPostalcode] = useState<string | null>(null);
 
   const [currentStep, setCurrentStep] = useState(1);
 
   const [countries, setCountries] = useState([]);
   const [states, setStates] = useState([]);
   const [districts, setDistricts] = useState([]);
-  const [taluks, setTaluks] = useState<[string, number][]>([]);
+  const [taluks, setTaluks] = useState<[string, number, string][]>([]);
   
 
   useEffect(() => {
@@ -71,6 +73,7 @@ const FilterSchools = () => {
       setDistrict(null);
       setTaluk(null);
       setTalukcode(null);
+      setPostalcode(null);
       setStates([]);
       setDistricts([]);
       setTaluks([]);
@@ -98,6 +101,7 @@ const FilterSchools = () => {
       setDistrict(null);
       setTaluk(null);
       setTalukcode(null);
+      setPostalcode(null);
       setDistricts([]);
       setTaluks([]);
       fetchDistricts();
@@ -124,6 +128,7 @@ const FilterSchools = () => {
   
       setTaluk(null);
       setTalukcode(null);
+      setPostalcode(null);
       setTaluks([]);
       fetchTaluks();
     }, [district]);
@@ -138,6 +143,7 @@ const FilterSchools = () => {
     setDistrict(null);
     setTaluk(null);
     setTalukcode(null);
+    setPostalcode(null);
     if (item.value) {
       setCurrentStep(2);
     }
@@ -151,6 +157,7 @@ const FilterSchools = () => {
     setDistrict(null);
     setTaluk(null);
     setTalukcode(null);
+    setPostalcode(null);
     if (item.value) {
       setCurrentStep(3);
     }
@@ -163,6 +170,7 @@ const FilterSchools = () => {
     setDistrict(item.value);
     setTaluk(null);
     setTalukcode(null);
+    setPostalcode(null);
     if (item.value) {
       setCurrentStep(4);
     }
@@ -174,6 +182,7 @@ const FilterSchools = () => {
   const handleTalukChange = (item:DropdownItem) => {
     setTaluk(item.value);
     if(item.id) setTalukcode(item.id);
+    if(item.postalcode) setPostalcode(item.postalcode);
     if (item.value) {
       setCurrentStep(5);
     }
@@ -200,7 +209,7 @@ const FilterSchools = () => {
       return;
     }
 
-    console.log(country, state, district, taluk, talukcode);
+    console.log(country, state, district, taluk, talukcode, postalcode);
     router.push({
       pathname: '/SchoolList',
       params: {
@@ -208,7 +217,8 @@ const FilterSchools = () => {
         state,
         district,
         taluk,
-        talukcode
+        talukcode,
+        postalcode
       },
     });
   };
@@ -287,7 +297,7 @@ const FilterSchools = () => {
             selectedTextStyle={styles.selectedTextStyle}
             inputSearchStyle={styles.inputSearchStyle}
             iconStyle={styles.iconStyle}
-            data={taluks?.map(([name,id]) => ({ label: name, value: name,id})) || []}
+            data={taluks?.map(([name,id,postalcode]) => ({ label: name, value: name,id,postalcode})) || []}
             search
             maxHeight={300}
             labelField="label"
