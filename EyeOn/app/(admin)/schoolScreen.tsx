@@ -5,7 +5,7 @@ import { useRouter } from 'expo-router';
 import RNPickerSelect from 'react-native-picker-select';
 import { API_URL } from "@env";
 import { Dropdown } from 'react-native-element-dropdown';
-
+import { ScrollView } from 'react-native';
 
 type DropdownItem = {
   label: string;
@@ -193,7 +193,7 @@ export default function SchoolScreen() {
     }
   };
 
-    const handleNext = () => {
+    const handleNext2 = () => {
       if (!country) {
         Alert.alert('Error', 'Please select a country');
         return;
@@ -225,8 +225,41 @@ export default function SchoolScreen() {
       });
     };
 
+    const handleNext1 = () => {
+      if (!country) {
+        Alert.alert('Error', 'Please select a country');
+        return;
+      }
+      if (!state) {
+        Alert.alert('Error', 'Please select a state');
+        return;
+      }
+      if (!district) {
+        Alert.alert('Error', 'Please select a district');
+        return;
+      }
+      if (!taluk) {
+        Alert.alert('Error', 'Please select a taluk');
+        return;
+      }
+  
+      console.log(country, state, district, taluk, talukcode);
+      router.push({
+        pathname: '/schoolForm',
+        params: {
+          country,
+          state,
+          district,
+          taluk,
+          postalcodepk:talukcode,
+          postalcode
+        },
+      });
+    };
+
 return (
   <View style={styles.container}>
+     <ScrollView contentContainerStyle={{ paddingBottom: 100 }} showsVerticalScrollIndicator={false}>
     <Text style={styles.header}>Filter Schools</Text>
     {currentStep >= 1 && (
       <View style={styles.filterBox}>
@@ -315,15 +348,16 @@ return (
     {currentStep === 5 && (
       <View style={{ alignItems: 'center' }}>
         <View style={{ flexDirection: 'row', justifyContent: 'space-between', width: '100%' }}>
-          <TouchableOpacity style={styles.button} onPress={handleNext}>
+          <TouchableOpacity style={styles.button} onPress={handleNext1}>
             <Text style={styles.buttonText}>Add School</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.button} onPress={handleNext}>
+          <TouchableOpacity style={styles.button} onPress={handleNext2}>
             <Text style={styles.buttonText}>View School</Text>
           </TouchableOpacity>
         </View>
       </View>
     )}
+    </ScrollView>
        {/* Bottom Navigation */}
        <View style={styles.bottomNav}>
         <Ionicons name="home" size={28} color="black" />

@@ -6,21 +6,20 @@ import { useLocalSearchParams } from 'expo-router';
 import { API_URL } from '@env';
 import * as FileSystem from 'expo-file-system';
 import * as Sharing from 'expo-sharing';
-
+import { useRouter } from 'expo-router';
 type schoolObj = {
   HMName: string;
   HMCN: string;
   SchoolCode: string;
   SchoolEmail:string|null;
+  Distance:number;
 };
 
 export default function SchoolDetails() {
-    const {schoolName, schoolpk, taluk, postalcode} = useLocalSearchParams();
+  const router = useRouter();
+    const {schoolName, schoolpk, country, state, district, taluk,postalcode} = useLocalSearchParams();
+    // console.log({schoolName,schoolpk,taluk,postalcode});
     const [school,setSchool] = useState<schoolObj|null>(null);
-    const [HMName,setHMName] = useState(null);
-    const [HMCN,setHMCN] = useState(null);
-    const [SchoolCode,setSchoolCode] = useState(null);
-    const [SchoolEmail,setSchoolEmail]=useState(null);
     const [TotalStudents,setTotalStudents]=useState(null);
 
     useEffect(() => {
@@ -142,11 +141,31 @@ export default function SchoolDetails() {
         <View style={styles.detailsCard}>
           <View style={styles.detailsHeader}>
             <Ionicons name="person-circle-outline" size={22} color="black" />
-            <Text style={styles.detailsTitle}>Details</Text>
-            <MaterialIcons name="edit" size={18} color="black" style={{ marginLeft: 'auto' }} />
+              <Text style={styles.detailsTitle}>Details</Text>
+              <MaterialIcons name="edit" size={30} color="black" style={{ marginLeft: 'auto' }}
+                  onPress={() =>
+                    router.push({
+                      pathname: '/schoolUpdateForm',
+                      params: {
+                        schoolpk,
+                        schoolCode: school?.SchoolCode,
+                        schoolName,
+                        HMName: school?.HMName,
+                        HMCN: school?.HMCN,
+                        distance: school?.Distance,
+                        schoolEmail: school?.SchoolEmail,
+                        country,
+                        state,
+                        district,
+                        taluk,
+                        postalcode
+                      },
+                    })
+                  }
+                />
         </View>
         <View style={styles.detailBody}>
-          <Text>Headmaster:{school?.HMName}</Text>
+          <Text>Headmaster: {school?.HMName}</Text>
           <Text>Contact: {school?.HMCN}</Text>
           <Text>School Code: {school?.SchoolCode}</Text>
           <Text>Taluk: {taluk}</Text>

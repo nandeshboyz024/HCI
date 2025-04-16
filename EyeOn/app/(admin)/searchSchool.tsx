@@ -62,6 +62,9 @@ export default function SearchSchool(){
             params: {
               schoolName,
               schoolpk,
+              country,
+              state,
+              district,
               taluk,
               postalcode
             },
@@ -79,7 +82,6 @@ export default function SearchSchool(){
         <Text style={styles.label}>District: {district}</Text>
         <Text style={styles.label}>Taluk: {taluk}</Text>
       </View>
-
       <View style={styles.container}>
         <Dropdown
           style={styles.dropdown}
