@@ -8,16 +8,16 @@ import { useRouter } from 'expo-router';
 type SchoolItem = {
     label: string;
     value: string;
-    code: string;
+    code: number;
 };
 
 export default function SearchSchool(){
   const router = useRouter();
   const { country, state, district, taluk, talukcode, postalcode} = useLocalSearchParams();
   const [schoolName, setSchoolName] = useState<string|null>(null);
-  const [schoolCode,setSchoolCode] = useState<string|null>(null);
+  const [schoolpk,setSchoolpk] = useState<number|null>(null);
 
-  const [schools, setSchools] = useState<[string, string][]>([]);
+  const [schools, setSchools] = useState<[number, string][]>([]);
 
   useEffect(() => {
       const fetchSchools = async () => {
@@ -52,16 +52,16 @@ export default function SearchSchool(){
 
   const handleSchoolChange = (item:SchoolItem) => {
     setSchoolName(item.value);
-    setSchoolCode(item.code);
+    setSchoolpk(item.code);
   };
 
   const handleGoToSchool = () => {
-    if (schoolCode) {
+    if (schoolpk) {
         router.push({
             pathname: '/schoolDetails',
             params: {
               schoolName,
-              schoolCode,
+              schoolpk,
               taluk,
               postalcode
             },

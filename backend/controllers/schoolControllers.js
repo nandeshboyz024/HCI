@@ -4,8 +4,8 @@ import sql from '../db.js';
 export const getSchools = async (req, res) => {
   try {
     const {postalcodepk} = req.body;
-    const result = await sql`SELECT "SchoolCode","SchoolName" FROM "Schools" WHERE "Postalcodepk"=${postalcodepk};`;
-    const schools = result.map(row => [row.SchoolCode,row.SchoolName]).filter(Boolean);
+    const result = await sql`SELECT "pk","SchoolName" FROM "Schools" WHERE "Postalcodepk"=${postalcodepk};`;
+    const schools = result.map(row => [row.pk,row.SchoolName]).filter(Boolean);
     res.json({
       success: true,
       data: schools,
@@ -21,12 +21,11 @@ export const getSchools = async (req, res) => {
 
 export const getSchool = async (req, res) => {
     try {
-      const {SchoolCode} = req.body;
-      const result = await sql`SELECT "SchoolCode","SchoolName" FROM "Schools" WHERE "Postalcodepk"=${postalcodepk};`;
-      const schools = result.map(row => [row.SchoolCode,row.SchoolName]).filter(Boolean);
+      const {schoolpk} = req.body;
+      const result = await sql`SELECT "HMName", "HMCN", "SchoolCode", "SchoolEmail" FROM "Schools" WHERE "pk"=${schoolpk};`;
       res.json({
         success: true,
-        data: schools,
+        data: result[0],
       });
     } catch (err) {
       console.error("Error fetching schools:", err);
