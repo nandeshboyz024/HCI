@@ -30,6 +30,7 @@ export const getStates = async (req, res) => {
       ORDER BY "State"
     `;
     const states = result.map(row => row.State).filter(Boolean);
+    
     res.json({
       success: true,
       data: states,

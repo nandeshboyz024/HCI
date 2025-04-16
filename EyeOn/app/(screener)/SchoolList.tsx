@@ -4,10 +4,10 @@ import { useLocalSearchParams } from 'expo-router';
 import { Dropdown } from 'react-native-element-dropdown';
 import { router } from 'expo-router';
 const SchoolList = () => {
-  const { country, state, district, taluk } = useLocalSearchParams();
+  const { country, state, district, taluk, talukcode } = useLocalSearchParams();
   const [selectedSchool, setSelectedSchool] = useState(null);
 
-  console.log(country, state, district, taluk);
+  console.log(country, state, district, taluk, talukcode);
 
   if (!country || !state || !district || !taluk) {
     return (

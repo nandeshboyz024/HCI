@@ -20,158 +20,160 @@ const FilterSchools = () => {
   const [state, setState] = useState<string | null>(null);
   const [district, setDistrict] = useState<string | null>(null);
   const [taluk, setTaluk] = useState<string | null>(null);
+
   const [talukcode, setTalukcode] = useState<number | null>(null);
 
   const [currentStep, setCurrentStep] = useState(1);
 
-  // const [countries, setCountries] = useState([]);
-  // const [states, setStates] = useState([]);
-  // const [districts, setDistricts] = useState([]);
-  // const [taluks, setTaluks] = useState([]);
+  const [countries, setCountries] = useState([]);
+  const [states, setStates] = useState([]);
+  const [districts, setDistricts] = useState([]);
+  const [taluks, setTaluks] = useState<[string, number][]>([]);
 
-  // useEffect(() => {
-  //     const fetchCountries = async () => {
-  //       try {
-  //         const response = await fetch(`${API_URL}/get-countries`, {
-  //           method: 'POST',
-  //           headers: { 'Content-Type': 'application/json' }
-  //         });
-  //         const res = await response.json();
-  //         if(res.success){
-  //           setCountries(res.data);
-  //         }
-  //       } catch (err) {
-  //         console.error("Error fetching countries:", err);
-  //       }
-  //     };
-  //     fetchCountries();
-  //   }, []);
+  useEffect(() => {
+      const fetchCountries = async () => {
+        try {
+          const response = await fetch(`${API_URL}/get-countries`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' }
+          });
+          const res = await response.json();
+          if(res.success){
+            setCountries(res.data);
+          }
+        } catch (err) {
+          console.error("Error fetching countries:", err);
+        }
+      };
+      fetchCountries();
+    }, []);
   
-  //   useEffect(() => {
-  //     if (!country) return;
+    useEffect(() => {
+      if (!country) return;
   
-  //     const fetchStates = async () => {
-  //       try {
-  //         const response = await fetch(`${API_URL}/get-states`, {
-  //           method: 'POST',
-  //           headers: { 'Content-Type': 'application/json' },
-  //           body: JSON.stringify({ Country: country })
-  //         });
-  //         const res = await response.json();
-  //         if(res.success){
-  //           setStates(res.data);
-  //         }
-  //       } catch (err) {
-  //         console.error("Error fetching states:", err);
-  //       }
-  //     };
+      const fetchStates = async () => {
+        try {
+          const response = await fetch(`${API_URL}/get-states`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ Country: country })
+          });
+          const res = await response.json();
+          if(res.success){
+            setStates(res.data);
+          }
+        } catch (err) {
+          console.error("Error fetching states:", err);
+        }
+      };
   
-  //     setState(null);
-  //     setDistrict(null);
-  //     setTaluk(null);
-  //     setStates([]);
-  //     setDistricts([]);
-  //     setTaluks([]);
-  //     fetchStates();
-  //   }, [country]);
+      setState(null);
+      setDistrict(null);
+      setTaluk(null);
+      setStates([]);
+      setDistricts([]);
+      setTaluks([]);
+      fetchStates();
+    }, [country]);
   
-  //   useEffect(() => {
-  //     if (!country || !state) return;
+    useEffect(() => {
+      if (!country || !state) return;
   
-  //     const fetchDistricts = async () => {
-  //       try {
-  //         const response = await fetch(`${API_URL}/get-districts`, {
-  //           method: 'POST',
-  //           headers: { 'Content-Type': 'application/json' },
-  //           body: JSON.stringify({ Country: country, State: state })
-  //         });
-  //         const res = await response.json();
-  //         if(res.success){
-  //           setDistricts(res.data);
-  //         }
-  //       } catch (err) {
-  //         console.error("Error fetching districts:", err);
-  //       }
-  //     };
-  //     setDistrict(null);
-  //     setTaluk(null);
-  //     setDistricts([]);
-  //     setTaluks([]);
-  //     fetchDistricts();
-  //   }, [state]);
+      const fetchDistricts = async () => {
+        try {
+          const response = await fetch(`${API_URL}/get-districts`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ Country: country, State: state })
+          });
+          const res = await response.json();
+          if(res.success){
+            setDistricts(res.data);
+          }
+        } catch (err) {
+          console.error("Error fetching districts:", err);
+        }
+      };
+      setDistrict(null);
+      setTaluk(null);
+      setDistricts([]);
+      setTaluks([]);
+      fetchDistricts();
+    }, [state]);
   
-  //   useEffect(() => {
-  //     if (!country || !state || !district) return;
-  
-  //     const fetchTaluks = async () => {
-  //       try {
-  //         const response = await fetch(`${API_URL}/get-taluks`, {
-  //           method: 'POST',
-  //           headers: { 'Content-Type': 'application/json' },
-  //           body: JSON.stringify({ Country: country, State: state, District: district })
-  //         });
-  //         const res = await response.json();
-  //         if(res.success){
-  //           setTaluks(res.data);
-  //         }
-  //       } catch (err) {
-  //         console.error("Error fetching taluks:", err);
-  //       }
-  //     };
-  
-  //     setTaluk(null);
-  //     setTaluks([]);
-  //     fetchTaluks();
-  //   }, [district]);
+  useEffect(() => {
+    if (!country || !state || !district) return;
+
+    const fetchTaluks = async () => {
+      try {
+        const response = await fetch(`${API_URL}/get-taluks`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ Country: country, State: state, District: district })
+        });
+        const res = await response.json();
+        if(res.success){
+          setTaluks(res.data);
+        }
+      } catch (err) {
+        console.error("Error fetching taluks:", err);
+      }
+    };
+
+    setTaluk(null);
+    setTalukcode(null);
+    setTaluks([]);
+    fetchTaluks();
+  }, [district]);
 
 
 
-  const countries = ['India', 'USA', 'Canada']; // Example data
-  const states = {
-    India: ['Karnataka', 'Maharashtra', 'Tamil Nadu'],
-    USA: ['California', 'Texas', 'New York'],
-    Canada: ['Ontario', 'British Columbia', 'Quebec'],
-  };
-  const districts = {
-    Karnataka: ['Bangalore', 'Mysore', 'Hubli'],
-    Maharashtra: ['Mumbai', 'Pune', 'Nagpur'],
-    TamilNadu: ['Chennai', 'Coimbatore', 'Madurai'],
-    California: ['Los Angeles', 'San Diego', 'San Jose'],
-    Texas: ['Houston', 'Dallas', 'Austin'],
-    NewYork: ['New York City', 'Buffalo', 'Rochester'],
-    Ontario: ['Toronto', 'Ottawa', 'Hamilton'],
-    BritishColumbia: ['Vancouver', 'Victoria', 'Kelowna'],
-    Quebec: ['Montreal', 'Quebec City', 'Gatineau'],
-  };
-  const taluks = {
-    Bangalore: ['Yelahanka', 'Devanahalli', 'Hoskote'],
-    Mysore: ['Nanjangud', 'T.Narsipur', 'H.D.Kote'],
-    Hubli: ['Dharwad', 'Navalgund', 'Ron'],
-    Mumbai: ['Andheri', 'Bandra', 'Chembur'],
-    Pune: ['Hadapsar', 'Kothrud', 'Shivajinagar'],
-    Nagpur: ['Kamptee', 'Katol', 'Saoner'],
-    Chennai: ['Ambattur', 'Ayanavaram', 'Guindy'],
-    Coimbatore: ['Pollachi', 'Mettupalayam', 'Perur'],
-    Madurai: ['Melur', 'Thirumangalam', 'Usilampatti'],
-    LosAngeles: ['Santa Monica', 'Beverly Hills', 'Hollywood'],
-    SanDiego: ['La Jolla', 'Chula Vista', 'Carlsbad'],
-    SanJose: ['Sunnyvale', 'Santa Clara', 'Cupertino'],
-    Houston: ['Pasadena', 'Baytown', 'Deer Park'],
-    Dallas: ['Plano', 'Irving', 'Garland'],
-    Austin: ['Round Rock', 'Cedar Park', 'Georgetown'],
-    NewYorkCity: ['Manhattan', 'Brooklyn', 'Queens'],
-    Buffalo: ['Amherst', 'Cheektowaga', 'Tonawanda'],
-    Rochester: ['Greece', 'Irondequoit', 'Brighton'],
-    Toronto: ['Mississauga', 'Brampton', 'Scarborough'],
-    Ottawa: ['Gatineau', 'Nepean', 'Kanata'],
-    Hamilton: ['Burlington', 'Stoney Creek', 'Ancaster'],
-    Vancouver: ['Surrey', 'Burnaby', 'Richmond'],
-    Victoria: ['Saanich', 'Langford', 'Colwood'],
-    Kelowna: ['West Kelowna', 'Lake Country', 'Peachland'],
-    Montreal: ['Laval', 'Longueuil', 'Terrebonne'],
-    QuebecCity: ['Lévis', 'Sainte-Foy', 'Beauport'],
-    Gatineau: ['Hull', 'Aylmer', 'Buckingham'],
-  };
+  // const countries = ['India', 'USA', 'Canada']; // Example data
+  // const states = {
+  //   India: ['Karnataka', 'Maharashtra', 'Tamil Nadu'],
+  //   USA: ['California', 'Texas', 'New York'],
+  //   Canada: ['Ontario', 'British Columbia', 'Quebec'],
+  // };
+  // const districts = {
+  //   Karnataka: ['Bangalore', 'Mysore', 'Hubli'],
+  //   Maharashtra: ['Mumbai', 'Pune', 'Nagpur'],
+  //   TamilNadu: ['Chennai', 'Coimbatore', 'Madurai'],
+  //   California: ['Los Angeles', 'San Diego', 'San Jose'],
+  //   Texas: ['Houston', 'Dallas', 'Austin'],
+  //   NewYork: ['New York City', 'Buffalo', 'Rochester'],
+  //   Ontario: ['Toronto', 'Ottawa', 'Hamilton'],
+  //   BritishColumbia: ['Vancouver', 'Victoria', 'Kelowna'],
+  //   Quebec: ['Montreal', 'Quebec City', 'Gatineau'],
+  // };
+  // const taluks = {
+  //   Bangalore: ['Yelahanka', 'Devanahalli', 'Hoskote'],
+  //   Mysore: ['Nanjangud', 'T.Narsipur', 'H.D.Kote'],
+  //   Hubli: ['Dharwad', 'Navalgund', 'Ron'],
+  //   Mumbai: ['Andheri', 'Bandra', 'Chembur'],
+  //   Pune: ['Hadapsar', 'Kothrud', 'Shivajinagar'],
+  //   Nagpur: ['Kamptee', 'Katol', 'Saoner'],
+  //   Chennai: ['Ambattur', 'Ayanavaram', 'Guindy'],
+  //   Coimbatore: ['Pollachi', 'Mettupalayam', 'Perur'],
+  //   Madurai: ['Melur', 'Thirumangalam', 'Usilampatti'],
+  //   LosAngeles: ['Santa Monica', 'Beverly Hills', 'Hollywood'],
+  //   SanDiego: ['La Jolla', 'Chula Vista', 'Carlsbad'],
+  //   SanJose: ['Sunnyvale', 'Santa Clara', 'Cupertino'],
+  //   Houston: ['Pasadena', 'Baytown', 'Deer Park'],
+  //   Dallas: ['Plano', 'Irving', 'Garland'],
+  //   Austin: ['Round Rock', 'Cedar Park', 'Georgetown'],
+  //   NewYorkCity: ['Manhattan', 'Brooklyn', 'Queens'],
+  //   Buffalo: ['Amherst', 'Cheektowaga', 'Tonawanda'],
+  //   Rochester: ['Greece', 'Irondequoit', 'Brighton'],
+  //   Toronto: ['Mississauga', 'Brampton', 'Scarborough'],
+  //   Ottawa: ['Gatineau', 'Nepean', 'Kanata'],
+  //   Hamilton: ['Burlington', 'Stoney Creek', 'Ancaster'],
+  //   Vancouver: ['Surrey', 'Burnaby', 'Richmond'],
+  //   Victoria: ['Saanich', 'Langford', 'Colwood'],
+  //   Kelowna: ['West Kelowna', 'Lake Country', 'Peachland'],
+  //   Montreal: ['Laval', 'Longueuil', 'Terrebonne'],
+  //   QuebecCity: ['Lévis', 'Sainte-Foy', 'Beauport'],
+  //   Gatineau: ['Hull', 'Aylmer', 'Buckingham'],
+  // };
 
   const handleCountryChange = (item) => {
     // const item = value;
@@ -268,7 +270,7 @@ const FilterSchools = () => {
             selectedTextStyle={styles.selectedTextStyle}
             inputSearchStyle={styles.inputSearchStyle}
             iconStyle={styles.iconStyle}
-            data={countries.map((country) => ({ label: country, value: country }))}
+            data={countries?.map((country) => ({ label: country, value: country }))}
             search
             maxHeight={300}
             labelField="label"
@@ -289,7 +291,9 @@ const FilterSchools = () => {
             selectedTextStyle={styles.selectedTextStyle}
             inputSearchStyle={styles.inputSearchStyle}
             iconStyle={styles.iconStyle}
-            data={states[country]?.map((state) => ({ label: state, value: state })) || []}
+            // data={states[country]?.map((state) => ({ label: state, value: state })) || []}
+            data={states?.map((state) => ({ label: state, value: state })) || []}
+
             search
             maxHeight={300}
             labelField="label"
@@ -310,7 +314,9 @@ const FilterSchools = () => {
             selectedTextStyle={styles.selectedTextStyle}
             inputSearchStyle={styles.inputSearchStyle}
             iconStyle={styles.iconStyle}
-            data={districts[state]?.map((district) => ({ label: district, value: district })) || []}
+            data={districts?.map((district) => ({ label: district, value: district })) || []}
+            // data={districts[state]?.map((district) => ({ label: district, value: district })) || []}
+
             search
             maxHeight={300}
             labelField="label"
@@ -331,7 +337,10 @@ const FilterSchools = () => {
             selectedTextStyle={styles.selectedTextStyle}
             inputSearchStyle={styles.inputSearchStyle}
             iconStyle={styles.iconStyle}
-            data={taluks[district]?.map((taluk) => ({ label: taluk, value: taluk })) || []}
+            // data={taluks[district]?.map((taluk) => ({ label: taluk, value: taluk })) || []}
+            // data={taluks?.map((taluk) => ({ label: taluk, value: taluk })) || []}
+            data={taluks.map(([name, id]) => ({ label: name, value: name, id}))}
+
             search
             maxHeight={300}
             labelField="label"
