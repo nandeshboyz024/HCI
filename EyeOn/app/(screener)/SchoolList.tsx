@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
-import { useLocalSearchParams } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import { Dropdown } from 'react-native-element-dropdown';
 
 const SchoolList = () => {
@@ -33,6 +33,17 @@ const SchoolList = () => {
   const handleGoToSchool = () => {
     if (selectedSchool) {
       // Navigate to the selected school or perform any other action
+      router.push({
+        pathname: '/(screener)/selectedSchools',
+        params: {
+          country,
+          state,
+          district,
+          taluk,
+          selectedSchool,
+        },
+      });
+      
       console.log(`Navigating to ${selectedSchool}`);
     } else {
       console.log('Please select a school first');

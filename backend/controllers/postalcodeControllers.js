@@ -29,6 +29,7 @@ export const getStates = async (req, res) => {
       WHERE "Country" = ${Country}
     `;
     const states = result.map(row => row.State).filter(Boolean);
+    
     res.json({
       success: true,
       data: states,
