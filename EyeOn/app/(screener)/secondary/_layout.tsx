@@ -12,7 +12,7 @@ export default function TesterLayout() {
           fontWeight: 'bold',
         }
       }}>
-    <Stack.Screen name="secondaryScreener" options={{ title: "Secondary Screener" }}/>
+    <Stack.Screen name="secondaryScreener" options={{ title: "Secondary Screening" }}/>
     <Stack.Screen name="secondaryVisionForm" options={{ title: "Secondary Screening Form" }}/>
     
     </Stack>

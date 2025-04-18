@@ -101,11 +101,12 @@ const VisionForm = () => {
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
-      <Text style={styles.title}>Secondary Evaluation</Text>
-      <Text style={styles.label}>Name: {studentName}</Text>
-      <Text style={styles.label}>Parent: {studentParent}</Text>
+      {/* <Text style={styles.title}>Secondary Evaluation</Text> */}
+      <Text style={styles.name}>Name: {studentName}</Text>
+      <Text style={styles.name}>Parent Name: {studentParent}</Text>
 
       <Text style={styles.sectionTitle}>Right Eye</Text>
+      <Text style={styles.label}>SPH</Text>
       <TextInput
         style={styles.input}
         placeholder="SPH"
@@ -113,6 +114,7 @@ const VisionForm = () => {
         onChangeText={setRightEyeSph}
         keyboardType="numeric"
       />
+      <Text style={styles.label}>CYL</Text>
       <TextInput
         style={styles.input}
         placeholder="CYL"
@@ -120,6 +122,7 @@ const VisionForm = () => {
         onChangeText={setRightEyeCyl}
         keyboardType="numeric"
       />
+      <Text style={styles.label}>AXIS</Text>
       <TextInput
         style={styles.input}
         placeholder="AXIS"
@@ -127,6 +130,7 @@ const VisionForm = () => {
         onChangeText={setRightEyeAxis}
         keyboardType="numeric"
       />
+      <Text style={styles.label}>VISION</Text>
       <TextInput
         style={styles.input}
         placeholder="VISION"
@@ -136,6 +140,7 @@ const VisionForm = () => {
       />
 
       <Text style={styles.sectionTitle}>Left Eye</Text>
+      <Text style={styles.label}>SPH</Text>
       <TextInput
         style={styles.input}
         placeholder="SPH"
@@ -143,6 +148,7 @@ const VisionForm = () => {
         onChangeText={setLeftEyeSph}
         keyboardType="numeric"
       />
+      <Text style={styles.label}>CYL</Text>
       <TextInput
         style={styles.input}
         placeholder="CYL"
@@ -150,6 +156,7 @@ const VisionForm = () => {
         onChangeText={setLeftEyeCyl}
         keyboardType="numeric"
       />
+      <Text style={styles.label}>AXIS</Text>
       <TextInput
         style={styles.input}
         placeholder="AXIS"
@@ -157,6 +164,7 @@ const VisionForm = () => {
         onChangeText={setLeftEyeAxis}
         keyboardType="numeric"
       />
+      <Text style={styles.label}>VISION</Text>
       <TextInput
         style={styles.input}
         placeholder="VISION"
@@ -222,6 +230,11 @@ const styles = StyleSheet.create({
   },
   label: {
     fontSize: 16,
+    marginBottom: 10,
+    // textAlign: 'center',
+  },
+  name: {
+    fontSize: 20,
     marginBottom: 10,
     textAlign: 'center',
   },
