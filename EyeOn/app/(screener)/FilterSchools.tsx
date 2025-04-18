@@ -225,7 +225,7 @@ const FilterSchools = () => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.header}>Filter Schools</Text>
+      <Text style={[styles.header, { textAlign: 'center' }]}>Filter Schools</Text>
       {currentStep >= 1 && (
         <View style={styles.filterBox}>
           <Dropdown
