@@ -12,8 +12,8 @@ export default function TesterLayout() {
           fontWeight: 'bold',
         }
       }}>
-    <Stack.Screen name="primaryScreener" options={{ title: "Primary Screener" }}/>
-    <Stack.Screen name="VisionForm" options={{ title: "Primary Screening Form" }}/>
+    <Stack.Screen name="primaryScreener" options={{ title: "Primary Screening" }}/>
+    <Stack.Screen name="visionForm" options={{ title: "Primary Screening Form" }}/>
     
     </Stack>
   );

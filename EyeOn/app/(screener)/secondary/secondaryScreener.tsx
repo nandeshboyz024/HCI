@@ -55,7 +55,7 @@ const SecondaryScreening = () => {
     };
 
     fetchStudents();
-  }, [selectedSchoolpk, selectedClass, selectedSection , activeTab]);
+  }, [selectedSchoolpk, selectedClass, selectedSection]);
 
   useEffect(() => {
     if (activeTab === 'remaining') {
