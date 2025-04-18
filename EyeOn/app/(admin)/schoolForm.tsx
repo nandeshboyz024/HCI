@@ -45,6 +45,9 @@ export default function SchoolForm() {
           router.push({
             pathname: '/schoolDetails',
             params: {
+              country,
+              state,
+              district,
               schoolName,
               schoolpk:res.schoolpk,
               taluk,

@@ -88,10 +88,12 @@ export const uploadStudents = async (req, res) => {
             END
           );
       `;
+      // console.log("added");
     }
 
     return res.status(200).json({
-      message: 'Data uploaded and inserted successfully',
+      success:true,
+      message: 'Data uploaded successfully',
       totalRecords: records.length
     });
 

@@ -87,10 +87,14 @@ export default function SchoolDetails() {
           body: formData,
         });
         const data = await response.json();
-        console.log('Upload response:', data);
+        if(data.success){
+          // console.log('Upload response:', data);
+          alert(data.message);
+        }
       }
       } catch (error) {
         console.error('File upload error:', error);
+        alert('Something went wrong! Please try again later.');
       }
   };
 
@@ -123,7 +127,7 @@ export default function SchoolDetails() {
     <View style={styles.container}>
       <Text style={styles.schoolName}>{schoolName}</Text>
       <Text style={styles.uploadedText}>
-        Total student uploaded : <Text style={{ color: '#5a3ff0', fontWeight: 'bold' }}>{TotalStudents?TotalStudents:"Loading..."}</Text>
+        Total students uploaded : <Text style={{ color: '#5a3ff0', fontWeight: 'bold' }}>{TotalStudents?TotalStudents:"Loading..."}</Text>
       </Text>
 
       <TouchableOpacity style={styles.downloadBtn} onPress={handleDownload}>
