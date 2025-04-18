@@ -1,15 +1,35 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, TextInput } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, TextInput, Alert } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+
+import { API_URL } from '@env';
+
 const VisionScreen = () => {
-  const { studentId, studentName, studentParent, studentREVision, studentLEVision } = useLocalSearchParams();
+  const { satsId, studentName, studentParent, studentREVision, studentLEVision , selectedSchoolpk, selectedClass, selectedSection, selectedSchoolName } = useLocalSearchParams();
   const router = useRouter();
 
   const [reVisionLeft, setReVisionLeft] = useState('6');
   const [reVisionRight, setReVisionRight] = useState('6');
   const [leVisionLeft, setLeVisionLeft] = useState('6');
   const [leVisionRight, setLeVisionRight] = useState('6');
+  const [reVision, setReVision] = useState('6/6');
+  const [leVision, setLeVision] = useState('6/6');
+
+  const showNotification = (message) => {
+    toast.success(message, {
+      position: "top-right",
+      autoClose: 5000,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: true,
+      progress: undefined,
+    });
+  };
+
 
   useEffect(() => {
     if (studentREVision) {
@@ -24,34 +44,50 @@ const VisionScreen = () => {
     }
   }, [studentREVision, studentLEVision]);
 
+
   const handleSubmit = async () => {
-    router.back(); // Navigate back to the previous screen
-
+     // Navigate back to the previous screen
+  
     // Handle the submit action here
-    // const visionData = {
-    //   reVision: `${reVisionLeft}/${reVisionRight}`,
-    //   leVision: `${leVisionLeft}/${leVisionRight}`,
-    // };
+    // setReVision(`${reVisionLeft}/${reVisionRight}`);
+    // setLeVision(`${leVisionLeft}/${leVisionRight}`);
+  
+    try {
+      const response = await fetch(`${API_URL}/primaryScreeningSubmitForm`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ satsId, reVision : `${reVisionLeft}/${reVisionRight}`, leVision : `${leVisionLeft}/${leVisionRight}`  })
+      });
+  
+      if (response.ok) {
+        const result = await response.json();
+        if (result.success) {
+          // Extract the student's name from the response data
+          const studentName = result.data[0]?.StudentName || 'Unknown';
+          // Show notification with the person's name
+          showNotification(`Primary Screening done successfully for ${studentName}`);
+        } else {
+          console.error('Form submission failed:', result.message);
+        }
+      } else {
+        console.error('Failed to submit form:', response.statusText);
+      }
+    } catch (error) {
+      console.error('Error submitting form:', error);
+    }
+    Alert.alert('Success', 'Primary Vision form submitted successfully.');
 
-    // try {
-    //   const response = await fetch(`YOUR_API_ENDPOINT/update-vision`, {
-    //     method: 'POST',
-    //     headers: {
-    //       'Content-Type': 'application/json',
-    //     },
-    //     body: JSON.stringify({ studentId, visionData }),
-    //   });
+    router.push({
+                    pathname: '/(screener)/primary/primaryScreener',
+                    params: {
+                      selectedSchoolpk,
+                      selectedClass,
+                      selectedSection,
+                      selectedSchoolName
+                    },
+                  });
 
-    //   if (response.ok) {
-    //     console.log('Vision data updated successfully');
-    //     router.back(); // Navigate back to the previous screen
-    //   } else {
-    //     console.error('Failed to update vision data');
-    //   }
-    // } catch (error) {
-    //   console.error('Error updating vision data:', error);
-    // }
-  };
+  };  
 
   return (
     <View style={styles.container}>
@@ -64,14 +100,14 @@ const VisionScreen = () => {
         <TextInput
           style={styles.visionInput}
           value={reVisionLeft}
-          onChangeText={setReVisionLeft}
+          onChangeText={(text) => setReVisionLeft(text)}
           keyboardType="numeric"
         />
         <Text style={styles.visionSeparator}>/</Text>
         <TextInput
           style={styles.visionInput}
           value={reVisionRight}
-          onChangeText={setReVisionRight}
+          onChangeText={(text) => setReVisionRight(text)}
           keyboardType="numeric"
         />
       </View>
@@ -81,14 +117,14 @@ const VisionScreen = () => {
         <TextInput
           style={styles.visionInput}
           value={leVisionLeft}
-          onChangeText={setLeVisionLeft}
+          onChangeText={(text) => setLeVisionLeft(text)}
           keyboardType="numeric"
         />
         <Text style={styles.visionSeparator}>/</Text>
         <TextInput
           style={styles.visionInput}
           value={leVisionRight}
-          onChangeText={setLeVisionRight}
+          onChangeText={(text) => setLeVisionRight(text)}
           keyboardType="numeric"
         />
       </View>
@@ -96,6 +132,7 @@ const VisionScreen = () => {
       <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
         <Text style={styles.submitButtonText}>Submit</Text>
       </TouchableOpacity>
+      
     </View>
   );
 };

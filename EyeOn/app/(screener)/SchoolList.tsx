@@ -2,11 +2,16 @@ import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { Dropdown } from 'react-native-element-dropdown';
+import { API_URL } from '@env';
+import { useEffect } from 'react';
 
 const SchoolList = () => {
   const { country, state, district, taluk, talukcode, postalcode} = useLocalSearchParams();
-  const [selectedSchool, setSelectedSchool] = useState(null);
+  const [selectedSchoolName, setSelectedSchoolName] = useState(null);
+  const [selectedSchoolpk, setSelectedSchoolpk] = useState<number|null>(null);
 
+  const [schools, setSchools] = useState<[number, string][]>([]);
+  
   console.log(country, state, district, taluk, talukcode, postalcode);
 
   if (!country || !state || !district || !taluk) {
@@ -19,19 +24,48 @@ const SchoolList = () => {
 
   console.log("me yanah hu ");
 
-  // Example data: List of schools based on the selected filters
-  const schools = [
-    { name: 'School 1', location: `${taluk}, ${district}, ${state}, ${country}` },
-    { name: 'School 2', location: `${taluk}, ${district}, ${state}, ${country}` },
-    // Add more schools as needed
-  ];
+  useEffect(() => {
+        const fetchSchools = async () => {
+          try {
+            const response = await fetch(`${API_URL}/get-schools`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({postalcodepk: talukcode})
+            });
+            const res = await response.json();
+            if(res.success){
+              setSchools(res.data);
+              
+              // console.log("Fetched schools:", res.data);
+            }
 
-  const handleSchoolSelect = (value) => {
-    setSelectedSchool(value);
+          } catch (err) {
+            console.error("Error fetching countries:", err);
+          }
+        };
+        fetchSchools();
+      }, []);
+
+
+
+
+  // Example data: List of schools based on the selected filters
+  // const schools = [
+  //   { name: 'School 1', location: `${taluk}, ${district}, ${state}, ${country}` },
+  //   { name: 'School 2', location: `${taluk}, ${district}, ${state}, ${country}` },
+  //   // Add more schools as needed
+  // ];
+
+  const handleSchoolSelect = (item) => {
+    setSelectedSchoolName(item.value);
+    // console.log("item",item);
+
+    setSelectedSchoolpk(item.code);
   };
 
   const handleGoToSchool = () => {
-    if (selectedSchool) {
+    console.log("selectedSchoolpk",selectedSchoolpk);
+    if (selectedSchoolName) {
       // Navigate to the selected school or perform any other action
       router.push({
         pathname: '/(screener)/selectedSchools',
@@ -40,11 +74,13 @@ const SchoolList = () => {
           state,
           district,
           taluk,
-          selectedSchool,
+          talukcode,
+          selectedSchoolpk,
+          selectedSchoolName
         },
       });
-      
-      console.log(`Navigating to ${selectedSchool}`);
+
+      console.log(`Navigating to ${selectedSchoolName}`);
     } else {
       console.log('Please select a school first');
     }
@@ -66,18 +102,17 @@ const SchoolList = () => {
           selectedTextStyle={styles.selectedTextStyle}
           inputSearchStyle={styles.inputSearchStyle}
           iconStyle={styles.iconStyle}
-          data={schools.map((school) => ({ label: school.name, value: school.name }))}
+          data={schools.map(([code,name]) => ({ label: name, value: name ,code}))}
           search
           maxHeight={300}
           labelField="label"
           valueField="value"
           placeholder="Select a School"
           searchPlaceholder="Search..."
-          value={selectedSchool}
-          onChange={item => {
-            handleSchoolSelect(item.value);
-          }}
+          value={selectedSchoolName}
+          onChange={handleSchoolSelect}
         />
+
         <TouchableOpacity style={styles.button} onPress={handleGoToSchool}>
           <Text style={styles.buttonText}>Go to School</Text>
         </TouchableOpacity>

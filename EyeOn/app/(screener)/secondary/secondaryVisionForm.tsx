@@ -1,26 +1,50 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, TextInput, ScrollView, Alert } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import RNPickerSelect from 'react-native-picker-select';
+import { API_URL } from '@env';
 
 const VisionForm = () => {
-  const { studentId, studentName, studentParent } = useLocalSearchParams();
+  const {
+    selectedSchoolpk,
+    selectedClass,
+    selectedSection,
+    selectedSchoolName,
+    satsId,
+    studentName,
+    studentParent,
+      studentRightEyeSPH,
+        studentRightEyeCyl,
+        studentRightEyeAxis,
+        studentRightEyeVision,
+        studentLeftEyeSPH,
+        studentLeftEyeCyl,
+        studentLeftEyeAxis,
+        studentLeftEyeVision,
+    selectedRefractiveError,
+    selectedSpectaclesFrameCode,
+    selectedMobileNumber,
+  } = useLocalSearchParams();
+
   const router = useRouter();
 
-  const [rightEyeSph, setRightEyeSph] = useState('');
-  const [rightEyeCyl, setRightEyeCyl] = useState('');
-  const [rightEyeAxis, setRightEyeAxis] = useState('');
-  const [rightEyeVision, setRightEyeVision] = useState('');
+  // console.log("ye data:"  , studentRightEye);
 
-  const [leftEyeSph, setLeftEyeSph] = useState('');
-  const [leftEyeCyl, setLeftEyeCyl] = useState('');
-  const [leftEyeAxis, setLeftEyeAxis] = useState('');
-  const [leftEyeVision, setLeftEyeVision] = useState('');
+  const [rightEyeSph, setRightEyeSph] = useState(studentRightEyeSPH || '');
+  const [rightEyeCyl, setRightEyeCyl] = useState(studentRightEyeCyl || '');
+  const [rightEyeAxis, setRightEyeAxis] = useState(studentRightEyeAxis || '');
+  const [rightEyeVision, setRightEyeVision] = useState(studentRightEyeVision || '');
 
-  const [mobileNumber, setMobileNumber] = useState('');
-  const [refractiveError, setRefractiveError] = useState('');
-const [spectaclesFrameCode, setSpectaclesFrameCode] = useState('');
-  const handleSubmit = () => {
+  const [leftEyeSph, setLeftEyeSph] = useState(studentLeftEyeSPH || '');
+  const [leftEyeCyl, setLeftEyeCyl] = useState(studentLeftEyeCyl || '');
+  const [leftEyeAxis, setLeftEyeAxis] = useState(studentLeftEyeAxis || '');
+  const [leftEyeVision, setLeftEyeVision] = useState(studentLeftEyeVision || '');
+
+  const [mobileNumber, setMobileNumber] = useState(selectedMobileNumber || '');
+  const [refractiveError, setRefractiveError] = useState(selectedRefractiveError || '');
+  const [spectaclesFrameCode, setSpectaclesFrameCode] = useState(selectedSpectaclesFrameCode || '');
+
+  const handleSubmit = async () => {
     if (!rightEyeSph || !rightEyeCyl || !rightEyeAxis || !rightEyeVision ||
         !leftEyeSph || !leftEyeCyl || !leftEyeAxis || !leftEyeVision ||
         !mobileNumber || !refractiveError || !spectaclesFrameCode) {
@@ -29,33 +53,50 @@ const [spectaclesFrameCode, setSpectaclesFrameCode] = useState('');
     }
 
     const visionData = {
-      rightEye: {
-        sph: rightEyeSph,
-        cyl: rightEyeCyl,
-        axis: rightEyeAxis,
-        vision: rightEyeVision,
-      },
-      leftEye: {
-        sph: leftEyeSph,
-        cyl: leftEyeCyl,
-        axis: leftEyeAxis,
-        vision: leftEyeVision,
-      },
+      satsId,
+      rightEyeSPH: parseFloat(rightEyeSph),
+      rightEyeCYL: parseFloat(rightEyeCyl),
+      rightEyeAXIS: parseInt(rightEyeAxis, 10),
+      rightEyeVision,
+      leftEyeSPH: parseFloat(leftEyeSph),
+      leftEyeCYL: parseFloat(leftEyeCyl),
+      leftEyeAXIS: parseInt(leftEyeAxis, 10),
+      leftEyeVision,
       mobileNumber,
-    spectaclesFrameCode,
       refractiveError,
+      spectaclesFrameCode,
     };
 
-    // router.push({
-    //   pathname: '/nextPage', // Replace with the actual path to the next page
-    //   params: {
-    //     studentId,
-    //     studentName,
-    //     studentParent,
-    //     visionData,
-    //   },
-    // });
-    router.back(); // Navigate back to the previous screen
+    try {
+      const response = await fetch(`${API_URL}/secondaryScreeningSubmitForm`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(visionData),
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        if (result.success) {
+          Alert.alert('Success', 'Vision form submitted successfully.');
+          router.push({
+                          pathname: '/(screener)/secondary/secondaryScreener',
+                          params: {
+                            selectedSchoolpk,
+                            selectedClass,
+                            selectedSection,
+                            selectedSchoolName
+                          },
+                        }); // Navigate back to the previous screen
+        } else {
+          Alert.alert('Error', 'Failed to submit vision form.');
+        }
+      } else {
+        Alert.alert('Error', 'Failed to submit vision form.');
+      }
+    } catch (error) {
+      console.error('Error submitting vision form:', error);
+      Alert.alert('Error', 'Failed to submit vision form.');
+    }
   };
 
   return (
@@ -70,21 +111,21 @@ const [spectaclesFrameCode, setSpectaclesFrameCode] = useState('');
         placeholder="SPH"
         value={rightEyeSph}
         onChangeText={setRightEyeSph}
-        keyboardType="default"
+        keyboardType="numeric"
       />
       <TextInput
         style={styles.input}
         placeholder="CYL"
         value={rightEyeCyl}
         onChangeText={setRightEyeCyl}
-        keyboardType="default"
+        keyboardType="numeric"
       />
       <TextInput
         style={styles.input}
         placeholder="AXIS"
         value={rightEyeAxis}
         onChangeText={setRightEyeAxis}
-        keyboardType="default"
+        keyboardType="numeric"
       />
       <TextInput
         style={styles.input}
@@ -100,21 +141,21 @@ const [spectaclesFrameCode, setSpectaclesFrameCode] = useState('');
         placeholder="SPH"
         value={leftEyeSph}
         onChangeText={setLeftEyeSph}
-        keyboardType="default"
+        keyboardType="numeric"
       />
       <TextInput
         style={styles.input}
         placeholder="CYL"
         value={leftEyeCyl}
         onChangeText={setLeftEyeCyl}
-        keyboardType="default"
+        keyboardType="numeric"
       />
       <TextInput
         style={styles.input}
         placeholder="AXIS"
         value={leftEyeAxis}
         onChangeText={setLeftEyeAxis}
-        keyboardType="default"
+        keyboardType="numeric"
       />
       <TextInput
         style={styles.input}
@@ -133,7 +174,7 @@ const [spectaclesFrameCode, setSpectaclesFrameCode] = useState('');
         keyboardType="phone-pad"
       />
 
-      <Text style={styles.sectionTitle}>Spectacles frame code </Text>
+      <Text style={styles.sectionTitle}>Spectacles Frame Code</Text>
       <TextInput
         style={styles.input}
         placeholder="Spectacles Frame Code"
@@ -159,7 +200,7 @@ const [spectaclesFrameCode, setSpectaclesFrameCode] = useState('');
       </View>
 
       <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
-        <Text style={styles.submitButtonText}>Next</Text>
+        <Text style={styles.submitButtonText}>Submit</Text>
       </TouchableOpacity>
     </ScrollView>
   );

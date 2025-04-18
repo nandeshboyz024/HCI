@@ -2,41 +2,70 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, FlatList, TextInput } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons'; // Import the icon library
+import { API_URL } from '@env'; // Ensure you have the correct path to your .env file
+// import { useLocalSearchParams } from 'expo-router'; // Ensure you have the correct path to your router
 
 const SecondaryScreening = () => {
-  const { country, state, district, taluk, selectedSchool, selectedClass, selectedSection } = useLocalSearchParams();
+  const { selectedSchoolpk,
+    selectedClass,
+    selectedSection,
+    selectedSchoolName } = useLocalSearchParams();
   const router = useRouter();
   const [students, setStudents] = useState([]);
   const [filteredStudents, setFilteredStudents] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
-
-  const [remainingStudents, setRemainingStudents] = useState(26);
-  const [testedStudents, setTestedStudents] = useState(24);
+  const [remainingStudents, setRemainingStudents] = useState([]);
+  const [testedStudents, setTestedStudents] = useState([]);
   const [activeTab, setActiveTab] = useState('remaining'); // 'remaining' or 'tested'
 
-  // Dummy data for remaining students
-  const dummyRemainingStudents = [
-    { id: '1', name: 'Rahul Choudhary', parent: 'Vikram Choudhary', age: 15, sex: 'M', status: 'Secondary Evaluation Required', reVision: '4/7', leVision: '6/9' },
-    { id: '2', name: 'Mohit Malhotra', parent: 'Ram Malhotra', age: 15, sex: 'M', status: 'Secondary Evaluation Required', reVision: '4/7', leVision: '6/9'},
-    { id: '3', name: 'Rohit Malhotra', parent: 'Jagdish Malhotra', age: 15, sex: 'M', status: 'Secondary Evaluation Required', reVision: '4/7', leVision: '6/9' },
-  ];
+  useEffect(() => {
+    const fetchStudents = async () => {
+      try {
+        const response = await fetch(`${API_URL}/getStudentsForSecondaryScreening`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            schoolpk: selectedSchoolpk,
+            className: selectedClass,
+            section: selectedSection,
+          }),
+        });
+        console.log("Response:", response);
 
-  // Dummy data for tested students
-  const dummyTestedStudents = [
-    { id: '4', name: 'Neha Sharma', parent: 'Devdatt Sharma', age: 15, sex: 'F', status: 'Secondary Evaluation Required', reVision: '4/7', leVision: '6/7', rightEye: { sph: '-1.00', cyl: '-0.50', axis: '180', vision: '6/6' }, leftEye: { sph: '-1.00', cyl: '-0.50', axis: '180', vision: '6/6' }, remark: 'Specs/Referred To Hospital' },
-    { id: '5', name: 'Amit Kumar', parent: 'Rakesh Kumar', age: 15, sex: 'M', status: 'Normal', rightEye: { sph: '0.00', cyl: '0.00', axis: '0', vision: '6/6' }, leftEye: { sph: '0.00', cyl: '0.00', axis: '0', vision: '6/6' }, remark: 'Normal' },
-    { id: '6', name: 'Priya Singh', parent: 'Rajesh Singh', age: 15, sex: 'F', status: 'Normal', rightEye: { sph: '0.00', cyl: '0.00', axis: '0', vision: '6/6' }, leftEye: { sph: '0.00', cyl: '0.00', axis: '0', vision: '6/6' }, remark: 'Normal' },
-  ];
+
+        if (response.ok) {
+          const result = await response.json();
+          if (result.success) {
+            const studentsData = result.data;
+            const remaining = studentsData.filter(student => student.status === 0);
+            const tested = studentsData.filter(student => student.status === 1);
+            setRemainingStudents(remaining);
+            setTestedStudents(tested);
+            setStudents(remaining); // Default to remaining students
+            setFilteredStudents(remaining); // Default to remaining students
+          } else {
+            console.error('Failed to fetch students:', result.message);
+          }
+        } else {
+          console.error('Failed to fetch students:', response.statusText);
+        }
+      } catch (error) {
+        console.error('Error fetching students:', error);
+      }
+    };
+
+    fetchStudents();
+  }, [selectedSchoolpk, selectedClass, selectedSection , activeTab]);
 
   useEffect(() => {
     if (activeTab === 'remaining') {
-      setStudents(dummyRemainingStudents);
-      setFilteredStudents(dummyRemainingStudents);
+      setStudents(remainingStudents);
+      setFilteredStudents(remainingStudents);
     } else {
-      setStudents(dummyTestedStudents);
-      setFilteredStudents(dummyTestedStudents);
+      setStudents(testedStudents);
+      setFilteredStudents(testedStudents);
     }
-  }, [activeTab]);
+  }, [activeTab, remainingStudents, testedStudents]);
 
   useEffect(() => {
     if (searchQuery.trim() === '') {
@@ -44,7 +73,7 @@ const SecondaryScreening = () => {
     } else {
       setFilteredStudents(
         students.filter((student) =>
-          student.name.toLowerCase().includes(searchQuery.toLowerCase())
+          student.StudentName.toLowerCase().includes(searchQuery.toLowerCase())
         )
       );
     }
@@ -52,27 +81,32 @@ const SecondaryScreening = () => {
 
   const handleTabPress = (tab) => {
     setActiveTab(tab);
-    if (tab === 'remaining') {
-      setStudents(dummyRemainingStudents);
-      setFilteredStudents(dummyRemainingStudents);
-    } else {
-      setStudents(dummyTestedStudents);
-      setFilteredStudents(dummyTestedStudents);
-    }
   };
 
   const handleStudentPress = (student) => {
     router.push({
       pathname: '/(screener)/secondary/secondaryVisionForm',
       params: {
-        studentId: student.id,
-        studentName: student.name,
-        studentParent: student.parent,
-        studentREVision: student.reVision || '6/6', // Default to '6/6' if not available
-        studentLEVision: student.leVision || '6/6', // Default to '6/6' if not available
-        studentRightEye: student.rightEye || {}, // Default to empty object if not available
-        studentLeftEye: student.leftEye || {}, // Default to empty object if not available
-        studentRemark: student.remark || '', // Default to empty string if not available
+        satsId: student.StudentId,
+        studentName: student.StudentName,
+        studentParent: student.ParentName,
+        studentRightEyeSPH: student.rightEyeSPH,
+        studentRightEyeCyl: student.rightEyeCYL,
+        studentRightEyeAxis: student.rightEyeAXIS,
+        studentRightEyeVision: student.rightEyeVision,
+        studentLeftEyeSPH: student.leftEyeSPH,
+        studentLeftEyeCyl: student.leftEyeCYL,
+        studentLeftEyeAxis: student.leftEyeAXIS,
+        studentLeftEyeVision: student.leftEyeVision,
+        
+        selectedRefractiveError: student.refractiveError || '', // Default to empty string if not available
+        selectedSpectaclesFrameCode: student.spectaclesFrameCode || '', // Default to empty string if not available
+        selectedMobileNumber: student.mobileNumber || '', // Default to empty string if not available
+        
+        selectedSchoolpk: selectedSchoolpk,
+        selectedClass: selectedClass,
+        selectedSection: selectedSection,
+        selectedSchoolName: selectedSchoolName
       },
     });
   };
@@ -80,32 +114,33 @@ const SecondaryScreening = () => {
   const renderStudentItem = ({ item }) => (
     <TouchableOpacity style={styles.studentItem} onPress={() => handleStudentPress(item)}>
       <View style={styles.studentIcon}>
-        <Text style={styles.studentIconText}>{item.name.charAt(0).toUpperCase()}</Text>
+        <Text style={styles.studentIconText}>{item.StudentName.charAt(0).toUpperCase()}</Text>
       </View>
       <View style={styles.studentDetails}>
-        <Text style={styles.studentName}>Name: {item.name}</Text>
-        <Text style={styles.studentParent}>Parent: {item.parent}</Text>
-        <Text style={styles.studentAgeSex}>Age: {item.age}, Sex: {item.sex}</Text>
-        
-        {activeTab==='remaining' && (
-            <> 
-                <Text style={styles.studentStatus}>Status: {item.status}</Text>
-                {item.reVision && <Text style={styles.studentVision}>RE Vision: {item.reVision}</Text>}
-                {item.leVision && <Text style={styles.studentVision}>LE Vision: {item.leVision}</Text>}
-            </>
+        <Text style={styles.studentName}>Name: {item.StudentName}</Text>
+        <Text style={styles.studentParent}>Parent: {item.ParentName}</Text>
+        <Text style={styles.studentAgeSex}>Age: {item.Age}, Sex: {item.Sex}</Text>
+
+        {activeTab === 'remaining' && (
+          <>
+            <Text style={styles.studentStatus}>Status: {item.primaryTestResultStatus}</Text>
+            {item.rightEyeVision && <Text style={styles.studentVision}>RE Vision: {item.rightEyeVision}</Text>}
+            {item.leftEyeVision && <Text style={styles.studentVision}>LE Vision: {item.leftEyeVision}</Text>}
+          </>
         )}
-            
+
         {activeTab === 'tested' && (
           <>
-            
+          <Text style={styles.studentAgeSex}>Mobile: {item.mobileNumber}</Text>
             <Text style={styles.studentEyeDetails}>Right Eye:</Text>
             <Text style={styles.studentEyeDetails}>
-             SPH: {item.rightEye.sph}, CYL: {item.rightEye.cyl}, AXIS: {item.rightEye.axis}, VISION: {item.rightEye.vision}
+              SPH: {item.rightEyeSPH}, CYL: {item.rightEyeCYL}, AXIS: {item.rightEyeAXIS}, VISION: {item.rightEyeVision}
             </Text>
             <Text style={styles.studentEyeDetails}>Left Eye:</Text>
-            <Text style={styles.studentEyeDetails}> SPH: {item.leftEye.sph}, CYL: {item.leftEye.cyl}, AXIS: {item.leftEye.axis}, VISION: {item.leftEye.vision}</Text>
-            
-            <Text style={styles.studentRemark}>Remark: {item.remark}</Text>
+            <Text style={styles.studentEyeDetails}>
+              SPH: {item.leftEyeSPH}, CYL: {item.leftEyeCYL}, AXIS: {item.leftEyeAXIS}, VISION: {item.leftEyeVision}
+            </Text>
+            <Text style={styles.studentRemark}>Remark: {item.refractiveError}</Text>
           </>
         )}
       </View>
@@ -114,11 +149,11 @@ const SecondaryScreening = () => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>{selectedSchool}</Text>
+      <Text style={styles.title}>{selectedSchoolName}</Text>
       <Text style={styles.subtitle}>Class {selectedClass}</Text>
       <Text style={styles.subtitle}>Section {selectedSection}</Text>
       <Text style={styles.info}>
-        <Text style={{ color: '#0497F3' }}>{remainingStudents}</Text> / {remainingStudents + testedStudents}
+        <Text style={{ color: '#0497F3' }}>{remainingStudents.length}</Text> / {remainingStudents.length + testedStudents.length}
       </Text>
 
       <View style={styles.buttonContainer}>
@@ -145,7 +180,7 @@ const SecondaryScreening = () => {
       <FlatList
         data={filteredStudents}
         renderItem={renderStudentItem}
-        keyExtractor={(item) => item.id.toString()}
+        keyExtractor={(item) => item.StudentId.toString()}
         style={styles.studentList}
       />
     </View>
@@ -252,11 +287,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#555',
   },
-  studentAge: {
-    fontSize: 14,
-    color: '#555',
-  },
-  studentSex: {
+  studentAgeSex: {
     fontSize: 14,
     color: '#555',
   },

@@ -2,45 +2,118 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, FlatList, TextInput } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons'; // Import the icon library
+import { API_URL } from '@env';
+import { useCallback } from 'react';
+
+
+
+
+
 
 const PrimaryScreening = () => {
-  const { country, state, district, taluk, selectedSchool, selectedClass, selectedSection } = useLocalSearchParams();
+  const { selectedSchoolpk, selectedClass, selectedSection, selectedSchoolName } = useLocalSearchParams();
   const router = useRouter();
   const [students, setStudents] = useState([]);
   const [filteredStudents, setFilteredStudents] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
 
-  const [remainingStudents, setRemainingStudents] = useState(27);
-  const [testedStudents, setTestedStudents] = useState(23);
+  const [nOfRemainingStudents, setnOfRemainingStudents] = useState(27);
+  const [nOfTestedStudents, setnOfTestedStudents] = useState(23);
   const [activeTab, setActiveTab] = useState('remaining'); // 'remaining' or 'tested'
 
+  const [remainingStudents, setRemainingStudents] = React.useState([]);
+  const [testedStudents, setTestedStudents] = React.useState([]);
+
+  let reloadKey = 0;
+
+  // const reloadPage = useCallback(() => {
+  //   setReloadKey((prevKey) => prevKey + 1);
+  // }, []);
+
+
+
+
+useEffect(() => {
+  const fetchStudents = async () => {
+    try {
+      const response = await fetch(`${API_URL}/getStudentsForPrimaryScreening`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ schoolpk: selectedSchoolpk, className: selectedClass, section: selectedSection })
+      });
+
+
+      if (response.ok) {
+        const result = await response.json();
+        if (result.success) {
+          // Separate students based on status
+          const remaining = result.data.filter(student => student.status === 0);
+          const tested = result.data.filter(student => student.status === 1);
+
+          // Transform the data into the desired format
+          const transformedRemainingStudents = remaining.map(student => ({
+            satsId: student.StudentId,
+            Name: student.StudentName,
+            Parent: student.ParentName,
+            Age: student.Age,
+            Sex: student.Sex
+          }));
+
+          const transformedTestedStudents = tested.map(student => ({
+            satsId: student.StudentId,
+            Name: student.StudentName,
+            Parent: student.ParentName,
+            Age: student.Age,
+            Sex: student.Sex,
+            status: student.testResultStatus,
+            reVision: student.reVision,
+            leVision: student.leVision
+          }));
+
+          setRemainingStudents(transformedRemainingStudents);
+          setTestedStudents(transformedTestedStudents);
+          setnOfRemainingStudents(transformedRemainingStudents.length);
+          setnOfTestedStudents(transformedTestedStudents.length);
+
+        } else {
+          console.error('No data found or API response indicates failure.');
+        }
+      } else {
+        console.error('Failed to fetch students:', response.statusText);
+      }
+    } catch (error) {
+      console.error('Error fetching students:', error);
+    }
+  };
+
+  if (selectedSchoolpk && selectedClass && selectedSection) {
+    fetchStudents();
+  }
+}, [selectedSchoolpk, selectedClass, selectedSection , activeTab]);
+
+
   // Dummy data for remaining students
-  const dummyRemainingStudents = [
-    { id: '1', name: 'Rahul Choudhary', parent: 'Vikram Choudhary', age: 15, sex: 'M' },
-    { id: '2', name: 'Mohit Malhotra', parent: 'Ram Malhotra', age: 15, sex: 'M' },
-    { id: '3', name: 'Rohit Malhotra', parent: 'Jagdish Malhotra', age: 15, sex: 'M' },
-  ];
+  // const dummyRemainingStudents = [
+  //   { id: '1', name: 'Rahul Choudhary', parent: 'Vikram Choudhary', age: 15, sex: 'M' },
+  //   { id: '2', name: 'Mohit Malhotra', parent: 'Ram Malhotra', age: 15, sex: 'M' },
+  //   { id: '3', name: 'Rohit Malhotra', parent: 'Jagdish Malhotra', age: 15, sex: 'M' },
+  // ];
 
-  // Dummy data for tested students
-  const dummyTestedStudents = [
-    { id: '4', name: 'Neha Sharma', parent: 'Devdatt Sharma', age: 15, sex: 'F', status: 'Secondary Evaluation Required', reVision: '4/7', leVision: '6/7' },
-    { id: '5', name: 'Amit Kumar', parent: 'Rakesh Kumar', age: 15, sex: 'M', status: 'Normal' },
-    { id: '6', name: 'Priya Singh', parent: 'Rajesh Singh', age: 15, sex: 'F', status: 'Normal', reVision: '5/6', leVision: '6/6' },
-    { id: '7', name: 'Riya Singh', parent: 'Rajesh Singh', age: 15, sex: 'F', status: 'Normal', reVision: '5/6', leVision: '6/6' },
-    // { id: '8', name: 'Priya Singh', parent: 'Rajesh Singh', age: 15, sex: 'F', status: 'Normal', reVision: '5/6', leVision: '6/6' },
-    // { id: '9', name: 'Priya Singh', parent: 'Rajesh Singh', age: 15, sex: 'F', status: 'Normal', reVision: '5/6', leVision: '6/6' },
-    // { id: '10', name: 'Priya Singh', parent: 'Rajesh Singh', age: 15, sex: 'F', status: 'Normal', reVision: '5/6', leVision: '6/6' },
-    // { id: '11', name: 'Priya Singh', parent: 'Rajesh Singh', age: 15, sex: 'F', status: 'Normal', reVision: '5/6', leVision: '6/6' },
-
-  ];
+  // // Dummy data for tested students
+  // const dummyTestedStudents = [
+  //   { id: '4', name: 'Neha Sharma', parent: 'Devdatt Sharma', age: 15, sex: 'F', status: 'Secondary Evaluation Required', reVision: '4/7', leVision: '6/7' },
+  //   { id: '5', name: 'Amit Kumar', parent: 'Rakesh Kumar', age: 15, sex: 'M', status: 'Normal' },
+  //   { id: '6', name: 'Priya Singh', parent: 'Rajesh Singh', age: 15, sex: 'F', status: 'Normal', reVision: '5/6', leVision: '6/6' },
+  //   { id: '7', name: 'Riya Singh', parent: 'Rajesh Singh', age: 15, sex: 'F', status: 'Normal', reVision: '5/6', leVision: '6/6' },
+  // ];
 
   useEffect(() => {
     if (activeTab === 'remaining') {
-      setStudents(dummyRemainingStudents);
-      setFilteredStudents(dummyRemainingStudents);
+      setStudents(remainingStudents);
+      setFilteredStudents(remainingStudents);
     } else {
-      setStudents(dummyTestedStudents);
-      setFilteredStudents(dummyTestedStudents);
+      setStudents(testedStudents);
+      setFilteredStudents(testedStudents);
     }
   }, [activeTab]);
 
@@ -50,20 +123,21 @@ const PrimaryScreening = () => {
     } else {
       setFilteredStudents(
         students.filter((student) =>
-          student.name.toLowerCase().includes(searchQuery.toLowerCase())
+          student.Name.toLowerCase().includes(searchQuery.toLowerCase())
         )
       );
     }
   }, [searchQuery, students]);
 
+
   const handleTabPress = (tab) => {
     setActiveTab(tab);
     if (tab === 'remaining') {
-      setStudents(dummyRemainingStudents);
-      setFilteredStudents(dummyRemainingStudents);
+      setStudents(remainingStudents);
+      setFilteredStudents(remainingStudents);
     } else {
-      setStudents(dummyTestedStudents);
-      setFilteredStudents(dummyTestedStudents);
+      setStudents(testedStudents);
+      setFilteredStudents(testedStudents);
     }
   };
 
@@ -71,11 +145,15 @@ const PrimaryScreening = () => {
     router.push({
       pathname: '/(screener)/primary/visionForm',
       params: {
-        studentId: student.id,
-        studentName: student.name,
-        studentParent: student.parent,
+        satsId: student.satsId,
+        studentName: student.Name,
+        studentParent: student.Parent,
         studentREVision: student.reVision || '6/6', // Default to '6/6' if not available
         studentLEVision: student.leVision || '6/6', // Default to '6/6' if not available
+        selectedSchoolpk,
+        selectedClass,
+        selectedSection,
+        selectedSchoolName
       },
     });
   };
@@ -83,13 +161,13 @@ const PrimaryScreening = () => {
   const renderStudentItem = ({ item }) => (
     <TouchableOpacity style={styles.studentItem} onPress={() => handleStudentPress(item)}>
       <View style={styles.studentIcon}>
-        <Text style={styles.studentIconText}>{item.name.charAt(0).toUpperCase()}</Text>
+        <Text style={styles.studentIconText}>{item.Name.charAt(0).toUpperCase()}</Text>
       </View>
       <View style={styles.studentDetails}>
-        <Text style={styles.studentName}>Name: {item.name}</Text>
-        <Text style={styles.studentParent}>Parent: {item.parent}</Text>
-        <Text style={styles.studentAge}>Age: {item.age}</Text>
-        <Text style={styles.studentSex}>Sex: {item.sex}</Text>
+        <Text style={styles.studentName}>Name: {item.Name}</Text>
+        <Text style={styles.studentParent}>Parent: {item.Parent}</Text>
+        <Text style={styles.studentAge}>Age: {item.Age}</Text>
+        <Text style={styles.studentSex}>Sex: {item.Sex}</Text>
         {activeTab === 'tested' && (
           <>
             <Text style={styles.studentStatus}>Status: {item.status}</Text>
@@ -103,11 +181,11 @@ const PrimaryScreening = () => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>{selectedSchool}</Text>
+      <Text style={styles.title}>{selectedSchoolName}</Text>
       <Text style={styles.subtitle}>Class {selectedClass}</Text>
       <Text style={styles.subtitle}>Section {selectedSection}</Text>
       <Text style={styles.info}>
-        <Text style={{ color: '#0497F3' }}>{remainingStudents}</Text> / {remainingStudents + testedStudents}
+        <Text style={{ color: '#0497F3' }}>{nOfRemainingStudents}</Text> / {nOfRemainingStudents + nOfTestedStudents}
       </Text>
 
       <View style={styles.buttonContainer}>
@@ -134,7 +212,7 @@ const PrimaryScreening = () => {
       <FlatList
         data={filteredStudents}
         renderItem={renderStudentItem}
-        keyExtractor={(item) => item.id.toString()}
+        keyExtractor={(item) => item.satsId.toString()}
         style={styles.studentList}
       />
     </View>

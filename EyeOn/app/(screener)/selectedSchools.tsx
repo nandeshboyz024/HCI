@@ -3,9 +3,14 @@ import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { Dropdown } from 'react-native-element-dropdown';
 import { useLocalSearchParams } from 'expo-router';
 import { router } from 'expo-router';
+import { useEffect } from 'react';
+// import axios from 'axios';
+import { API_URL } from '@env';
+// import { useRouter } from 'expo-router';
 
 const Screener = () => {
-  const { country, state, district, taluk, selectedSchool } = useLocalSearchParams();
+  const { country, state, district, taluk, talukcode, selectedSchoolName, selectedSchoolpk } = useLocalSearchParams();
+  
   const [selectedClass, setSelectedClass] = useState(null);
   const [selectedSection, setSelectedSection] = useState(null);
   const [selectedTesterType, setSelectedTesterType] = useState(null);
@@ -14,39 +19,114 @@ const Screener = () => {
   const [primaryScreenedStudents, setPrimaryScreenedStudents] = useState(234);
   const [secondaryScreenedStudents, setSecondaryScreenedStudents] = useState(197);
 
-  const classes = [
-    { label: 'Class 1', value: '1' },
-    { label: 'Class 2', value: '2' },
-    { label: 'Class 3', value: '3' },
-    // Add more classes as needed
-  ];
+  // const classes = [
+  //   { label: 'Class 1', value: 1 },
+  //   { label: 'Class 2', value: 2 },
+  //   { label: 'Class 3', value: 3 },
+  //   // Add more classes as needed
+  // ];
 
-  const sections = [
-    { label: 'Section A', value: 'A' },
-    { label: 'Section B', value: 'B' },
-    { label: 'Section C', value: 'C' },
-    // Add more sections as needed
-  ];
+  const [classes, setClasses] = React.useState([]);
+  
+useEffect(() => {
+  const fetchClasses = async () => {
+    try {
+      const response = await fetch(`${API_URL}/getClasses`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ schoolpk: selectedSchoolpk })
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        if (result.success) {
+          // Transform the data into the desired format
+          const transformedClasses = result.data.map(item => ({
+            label: `Class ${item.Class}`,
+            value: item.Class // Ensure the value is a number
+          }));
+          setClasses(transformedClasses);
+        } else {
+          console.error('No data found or API response indicates failure.');
+        }
+      } else {
+        console.error('Failed to fetch classes:', response.statusText);
+      }
+    } catch (error) {
+      console.error('Error fetching classes:', error);
+    }
+  };
+
+  if (selectedSchoolpk) {
+    fetchClasses();
+  }
+}, [selectedSchoolpk]);
+
+
+
+  // const sections = [
+  //   { label: 'Section A', value: 'A' },
+  //   { label: 'Section B', value: 'B' },
+  //   { label: 'Section C', value: 'C' },
+  //   // Add more sections as needed
+  // ];
+
+const [sections, setSections] = useState([]);
+
+useEffect(() => {
+  const fetchSections = async () => {
+    try {
+      const response = await fetch(`${API_URL}/getSections`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ schoolpk: selectedSchoolpk, className: selectedClass })
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        console.log("result",result);
+
+        if (result.success) {
+          // Transform the data into the desired format
+          const transformedSections = result.data[0].Sections.map(section => ({
+            label: `Section ${section}`,
+            value: section
+          }));
+          setSections(transformedSections);
+        } else {
+          console.error('No data found or API response indicates failure.');
+        }
+      } else {
+        console.error('Failed to fetch sections:', response.statusText);
+      }
+    } catch (error) {
+      console.error('Error fetching sections:', error);
+    }
+  };
+
+  if (selectedSchoolpk && selectedClass) {
+    fetchSections();
+  }
+}, [selectedSchoolpk, selectedClass]);
+
+
 
   const testerTypes = [
     { label: 'Primary', value: 'Primary' },
     { label: 'Secondary', value: 'Secondary' },
     { label: 'Tertiary', value: 'Tertiary' },
   ];
+
   const handlenext = () => {
     if (selectedClass && selectedSection && selectedTesterType) {
         if(selectedTesterType === 'Primary') {
             router.push({
                 pathname: '/(screener)/primary/primaryScreener',
                 params: {
-                  country,
-                  state,
-                  district,
-                  taluk,
-                  selectedSchool,
+                  selectedSchoolpk,
                   selectedClass,
                   selectedSection,
-                  selectedTesterType,
+                  selectedSchoolName
                 },
               });
         }
@@ -54,14 +134,10 @@ const Screener = () => {
             router.push({
                 pathname: '/(screener)/secondary/secondaryScreener',
                 params: {
-                  country,
-                  state,
-                  district,
-                  taluk,
-                  selectedSchool,
+                  selectedSchoolpk,
                   selectedClass,
                   selectedSection,
-                  selectedTesterType,
+                  selectedSchoolName
                 },
               });
         }
@@ -73,7 +149,9 @@ const Screener = () => {
                   state,
                   district,
                   taluk,
-                  selectedSchool,
+                  talukcode,
+                  selectedSchoolName,
+                  selectedSchoolpk,
                   selectedClass,
                   selectedSection,
                   selectedTesterType,
@@ -88,7 +166,7 @@ const Screener = () => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>{selectedSchool}</Text>
+      <Text style={styles.title}>{selectedSchoolName}</Text>
       <Text style={styles.info}>Total Students: {totalStudent}</Text>
       <Text style={styles.info}>Primary Screened Students: {primaryScreenedStudents}</Text>
       <Text style={styles.info}>Secondary Screened Students: {secondaryScreenedStudents}</Text>
