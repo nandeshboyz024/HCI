@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
 import {API_URL} from "@env";
 import {useRouter} from 'expo-router';
-import { View, Text, TextInput, StyleSheet, TouchableOpacity, Alert} from 'react-native';
+import { View, Text, TextInput, StyleSheet,ActivityIndicator, TouchableOpacity, Alert} from 'react-native';
 
 export default function ChangePasswordScreen() {
   const router = useRouter();
+  const [loading,setLoading] = useState(false);
 
   const [username, setUsername] = useState('');
   const [currentPassword, setCurrentPassword] = useState('');
@@ -62,6 +63,7 @@ export default function ChangePasswordScreen() {
 
   const handleSubmit = async() => {
     if (!validate()) return;
+    setLoading(true);
     try{
       const response = await fetch(`${API_URL}/change-admin-password`, {
               method:'POST',
@@ -92,55 +94,12 @@ export default function ChangePasswordScreen() {
       console.error(err);
       Alert.alert('Error', 'Something went wrong. Please try again later.');
     }
+    finally{
+      setLoading(false);
+    }
   }
 
-  return (
-    // <View style={styles.container}>
-    //   <Text style={styles.title}>Change Password</Text>
-
-    //   <Text style={styles.label}>Username</Text>
-    //   <TextInput
-    //     style={styles.input}
-    //     value={username}
-    //     onChangeText={setUsername}
-    //     placeholder="Enter username"
-    //     placeholderTextColor="#aaa"
-    //   />
-
-    //   <Text style={styles.label}>Current Password</Text>
-    //   <TextInput
-    //     style={styles.input}
-    //     value={currentPassword}
-    //     onChangeText={setCurrentPassword}
-    //     secureTextEntry
-    //     placeholder="Enter current password"
-    //     placeholderTextColor="#aaa"
-    //   />
-
-    //   <Text style={styles.label}>New Password</Text>
-    //   <TextInput
-    //     style={styles.input}
-    //     value={newPassword}
-    //     onChangeText={setNewPassword}
-    //     secureTextEntry
-    //     placeholder="Enter new password"
-    //     placeholderTextColor="#aaa"
-    //   />
-
-    //   <Text style={styles.label}>Confirm New Password</Text>
-    //   <TextInput
-    //     style={styles.input}
-    //     value={confirmPassword}
-    //     onChangeText={setConfirmPassword}
-    //     secureTextEntry
-    //     placeholder="Confirm new password"
-    //     placeholderTextColor="#aaa"
-    //   />
-
-    //   <TouchableOpacity style={styles.button} onPress={handleSubmit}>
-    //     <Text style={styles.buttonText}>Submit</Text>
-    //   </TouchableOpacity>
-    // </View>
+  return (  
     <View style={styles.container}>
       <Text style={styles.title}>Change Password</Text>
 
@@ -186,51 +145,18 @@ export default function ChangePasswordScreen() {
         placeholderTextColor="#aaa"
       />
       {errors.confirmPassword && <Text style={styles.error}>{errors.confirmPassword}</Text>}
-
+      {loading?(
+        <ActivityIndicator size="large" style={styles.loader} />
+      ):
+      (
       <TouchableOpacity style={styles.button} onPress={handleSubmit}>
         <Text style={styles.buttonText}>Submit</Text>
       </TouchableOpacity>
+    )
+    }
     </View>
   );
 }
-
-// const styles = StyleSheet.create({
-//   container: {
-//     padding: 24,
-//     backgroundColor: '#fff',
-//     flex: 1,
-//     justifyContent: 'center',
-//   },
-//   title: {
-//     fontSize: 22,
-//     fontWeight: 'bold',
-//     alignSelf: 'center',
-//     marginBottom: 24,
-//   },
-//   label: {
-//     fontSize: 14,
-//     marginBottom: 4,
-//     color: '#333',
-//   },
-//   input: {
-//     backgroundColor: '#E0E0E0',
-//     borderRadius: 8,
-//     padding: 12,
-//     marginBottom: 16,
-//     color: '#000',
-//   },
-//   button: {
-//     backgroundColor: '#A084E8',
-//     borderRadius: 8,
-//     paddingVertical: 12,
-//     alignItems: 'center',
-//     marginTop: 12,
-//   },
-//   buttonText: {
-//     color: '#fff',
-//     fontWeight: '600',
-//   },
-// });
 
 const styles = StyleSheet.create({
   container: {
@@ -272,5 +198,9 @@ const styles = StyleSheet.create({
   buttonText: {
     color: '#fff',
     fontWeight: '600',
+  },
+  loader:{
+    width:250,
+    alignSelf:'center'
   },
 });

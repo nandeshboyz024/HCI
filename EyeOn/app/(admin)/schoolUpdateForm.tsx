@@ -14,6 +14,7 @@ interface LabelInputProps {
 export default function SchoolUpdateForm() {
   const router = useRouter();
   const { country, state, district, taluk, schoolpk, schoolName:initSchoolName,schoolCode:initSchoolCode,HMName:initHMName,HMCN:initHMCN,distance:intDistance,schoolEmail:initSchoolEmail,postalcode} = useLocalSearchParams();
+  const [loading, setLoading] = useState(false);
 
   const getString = (val: string | string[] | undefined): string =>  Array.isArray(val) ? val[0] : val ?? '';
   const [schoolCode, setSchoolCode] = useState(getString(initSchoolCode));
@@ -39,6 +40,7 @@ export default function SchoolUpdateForm() {
 
   const handleUpdate = async () => {
     if (!validate()) return;
+    setLoading(true);
     try {
       const response = await fetch(`${API_URL}/update-school`, {
         method: 'PUT',
@@ -61,7 +63,7 @@ export default function SchoolUpdateForm() {
         Alert.alert('Success', 'School updated successfully.', [
           { text: 'OK',
             onPress: () => 
-                router.push({
+                router.replace({
                     pathname:'/schoolDetails',
                     params:{
                         schoolName, 
@@ -81,10 +83,20 @@ export default function SchoolUpdateForm() {
     } catch (err) {
       Alert.alert('Error', 'Something went wrong. Please try again.');
     }
+    finally{
+      setLoading(false);
+    }
   };
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
+      {loading && (
+            <View style={styles.loadingOverlay}>
+              <View style={styles.loadingBox}>
+                <Text style={styles.loadingText}>Please wait…</Text>
+              </View>
+            </View>
+          )}
       <View style={{ alignItems: 'center', justifyContent: 'center' }}>
         <Text style={styles.label}>Country: {country}</Text>
         <Text style={styles.label}>State: {state}</Text>
@@ -225,4 +237,26 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontWeight: 'bold',
   },
+  loadingOverlay: {
+    position: 'absolute',
+    top: 0,
+    bottom: 0,
+    left: 0,
+    right: 0,
+    backgroundColor: 'rgba(0,0,0,0.4)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 20,
+  },
+  loadingBox: {
+    paddingVertical: 20,
+    paddingHorizontal: 30,
+    backgroundColor: '#fff',
+    borderRadius: 10,
+    elevation: 6,
+  },
+  loadingText: {
+    fontSize: 16,
+    fontWeight: '600',
+  },  
 });

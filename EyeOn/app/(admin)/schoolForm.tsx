@@ -13,6 +13,7 @@ interface LabelInputProps {
 export default function SchoolForm() {
   const router = useRouter(); 
   const {country,state,district,taluk,postalcodepk,postalcode} = useLocalSearchParams();
+  const [loading, setLoading] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
 
   const [schoolCode, setSchoolCode] = useState('');
@@ -24,6 +25,7 @@ export default function SchoolForm() {
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
 
     const submitForm = async()=>{
+    setLoading(true);
     try{
           const response = await fetch(`${API_URL}/add-school`, {
           method:'POST',
@@ -61,16 +63,20 @@ export default function SchoolForm() {
       } catch(err){
         Alert.alert('Error','Something went wrong. Please try again.');
       }
+      finally{
+        setLoading(false);
+      }
   }
 
   const validate = () => {
     const newErrors: { [key: string]: string } = {};
 
-    if (!schoolCode.trim()) newErrors.schoolCode = 'School Code is required.';
-    if (!schoolName.trim()) newErrors.schoolName = 'School Name is required.';
-    if (!HMName.trim()) newErrors.HMName = 'Headmaster Name is required.';
-    if (!HMCN.trim()) newErrors.HMCN = 'Contact Number (HM) is required.';
+    if (!schoolCode.trim()) newErrors.schoolCode = 'Please Enter Unique School Code.';
+    if (!schoolName.trim()) newErrors.schoolName = 'Please Enter School Name.';
+    if (!HMName.trim()) newErrors.HMName = 'Please Enter Headmaster\'s name.';
+    if (!/^\d{10}$/.test(HMCN.trim())) newErrors.HMCN = 'Contact number required 10 digits.';
     if (!distance.trim() || isNaN(Number(distance))) newErrors.distance = 'Distance must be a valid number.';
+    if (schoolEmail.trim() && !schoolEmail.includes('@')) newErrors.schoolEmail = 'Email must contain "@"';
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -83,7 +89,16 @@ export default function SchoolForm() {
   
 
   return (
+    
+    
     <ScrollView contentContainerStyle={styles.container}>
+      {loading && (
+      <View style={styles.loadingOverlay}>
+        <View style={styles.loadingBox}>
+          <Text style={styles.loadingText}>Please wait…</Text>
+        </View>
+      </View>
+    )}
          <View style={{ alignItems: 'center', justifyContent: 'center' }}>
                 <Text style={styles.label}>Country: {country}</Text>
                 <Text style={styles.label}>State: {state}</Text>
@@ -125,7 +140,7 @@ export default function SchoolForm() {
       />
 
       <LabelInput
-        label="Distance"
+        label="Distance (in Km)"
         required
         value={distance}
         onChangeText={(text: string) => setDistance(text)}
@@ -138,6 +153,7 @@ export default function SchoolForm() {
         value={schoolEmail}
         onChangeText={(text: string) => setSchoolEmail(text)}
         keyboardType="email-address"
+        error={errors.schoolEmail}
       />
 
       <Text style={styles.requiredNote}>*Required</Text>
@@ -155,10 +171,13 @@ export default function SchoolForm() {
     <View style={styles.modalContainer}>
       <Text style={styles.modalTitle}>Confirm Submission</Text>
       <Text style={styles.modalMessage}>
-        Please confirm that the School's location (Country, State, District, Taluk) is correct.
-        You will not be able to edit this information later.
+      Please confirm that the school's location — country, state, district, and taluk — is correct.  
+      You will not be able to edit the location later, but you can still edit the other school details.
       </Text>
       <View style={styles.modalButtons}>
+        <TouchableOpacity style={styles.cancelBtn} onPress={() => setShowConfirm(false)}>
+          <Text style={styles.cancelText}>Cancel</Text>
+        </TouchableOpacity>
         <TouchableOpacity
           style={styles.saveBtn}
           onPress={() => {
@@ -168,9 +187,7 @@ export default function SchoolForm() {
         >
         <Text style={styles.saveText}>Confirm</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.cancelBtn} onPress={() => setShowConfirm(false)}>
-          <Text style={styles.cancelText}>Cancel</Text>
-        </TouchableOpacity>
+        
       </View>
     </View>
   </View>
@@ -289,5 +306,26 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
   },
-  
+  loadingOverlay: {
+    position: 'absolute',
+    top: 0,
+    bottom: 0,
+    left: 0,
+    right: 0,
+    backgroundColor: 'rgba(0,0,0,0.4)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 20,
+  },
+  loadingBox: {
+    paddingVertical: 20,
+    paddingHorizontal: 30,
+    backgroundColor: '#fff',
+    borderRadius: 10,
+    elevation: 6,
+  },
+  loadingText: {
+    fontSize: 16,
+    fontWeight: '600',
+  },  
 });

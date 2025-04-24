@@ -88,7 +88,7 @@ export const uploadStudents = async (req, res) => {
             END
           );
       `;
-      // console.log("added");
+      console.log("added");
     }
 
     return res.status(200).json({
@@ -122,6 +122,7 @@ export const getTotalStudents = async (req, res) =>{
 export const downloadStudents = async (req, res) => {
   try {
     const { schoolpk } = req.body;
+    console.log(schoolpk);
 
     const students = await sql`
       SELECT "StudentId", "StudentName", "ParentName", "Age", "Sex", "Class", "Section"
@@ -129,15 +130,9 @@ export const downloadStudents = async (req, res) => {
       WHERE "Schoolpk" = ${schoolpk}
     `;
 
-    if (students.length === 0) {
-      return res.status(404).json({ message: 'No students found.' });
-    }
-
     res.setHeader('Content-Type', 'text/csv');
     res.setHeader('Content-Disposition', `attachment; filename=students_${schoolpk}.csv`);
-
     stringify(students, { header: true }).pipe(res);
-
   } catch (err) {
     console.error('Download error:', err);
     return res.status(500).json({ message: 'Failed to download CSV', error: err.message });

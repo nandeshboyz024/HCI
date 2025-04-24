@@ -2,19 +2,18 @@ import {API_URL} from "@env";
 import {useState} from 'react';
 import {useRouter} from 'expo-router';
 
-// import { Link } from 'expo-router';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from 'react-native';
+import {ActivityIndicator, View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from 'react-native';
 
 export default function AdminLogin() {
   const router = useRouter();
   const [username, setUsername]= useState('nandeshboyz');
   const [password, setPassword] = useState('12345678');
+  const [loading,setLoading] = useState(false);
   
   const handleLogin = async()=>{
-    
+    if(loading) return;
+    setLoading(true);
     try{
-      // const response = await fetch('http://localhost:5000/varify-admin',{
-
         const response = await fetch(`${API_URL}/varify-admin`, {
         method:'POST',
         headers:{
@@ -24,15 +23,15 @@ export default function AdminLogin() {
       });
       const data = await response.json();
       if(data.success){
-        Alert.alert('Success',data.message);
         router.push('/schoolScreen');
       }
       else{
         Alert.alert('Error',data.message);
       }
     } catch(err){
-      console.error(err);
       Alert.alert('Error','Something went wrong. Please try again.');
+    } finally{
+      setLoading(false);
     }
   }
   return (
@@ -57,18 +56,15 @@ export default function AdminLogin() {
         value={password}
         onChangeText={setPassword}
       />
-
-      <TouchableOpacity style={styles.button} onPress={handleLogin}>
-        <Text style={styles.buttonText}>Login</Text>
-      </TouchableOpacity>
-    {/* 
-      <Link href="/schoolScreen" asChild>
-        <TouchableOpacity style={styles.button}>
-          <Text style={styles.buttonText}>Login</Text>
-        </TouchableOpacity>
-      </Link>
-    */}
-
+      {loading?(
+        <ActivityIndicator size="large" style={styles.loader} />
+        ):(
+          <TouchableOpacity style={styles.button} onPress={handleLogin}>
+            <Text style={styles.buttonText}>Login</Text>
+          </TouchableOpacity>
+        )
+      }
+      
     </View>
   );
 }
@@ -105,11 +101,15 @@ const styles = StyleSheet.create({
     width: 250,
     borderRadius: 8,
     alignItems: 'center',
-    alignSelf: 'center', // THIS is what centers it inside the parent View
+    alignSelf: 'center',
   },
   buttonText: {
     fontSize: 18,
     color: '#fff',
     fontWeight: 'bold',
   },
+  loader:{
+    width:250,
+    alignSelf:'center'
+  }
 });

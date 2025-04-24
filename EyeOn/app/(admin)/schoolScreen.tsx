@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Modal, Pressable,Alert,Button } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, Modal, Pressable} from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import RNPickerSelect from 'react-native-picker-select';
 import { API_URL } from "@env";
 import { Dropdown } from 'react-native-element-dropdown';
 import { ScrollView } from 'react-native';
@@ -30,6 +29,8 @@ export default function SchoolScreen() {
   const [districts, setDistricts] = useState([]);
   const [taluks, setTaluks] = useState<[string, number, string][]>([]);
   const [currentStep, setCurrentStep] = useState(1);
+
+  const [error,setError] = useState<String|null>(null);
 
   // Fetch countries on initial load
   useEffect(() => {
@@ -195,19 +196,19 @@ export default function SchoolScreen() {
 
     const handleNext2 = () => {
       if (!country) {
-        Alert.alert('Error', 'Please select a country');
+        setError('Please select a country');
         return;
       }
       if (!state) {
-        Alert.alert('Error', 'Please select a state');
+        setError('Please select a state');
         return;
       }
       if (!district) {
-        Alert.alert('Error', 'Please select a district');
+        setError('Please select a district');
         return;
       }
       if (!taluk) {
-        Alert.alert('Error', 'Please select a taluk');
+        setError('Please select a taluk');
         return;
       }
   
@@ -227,19 +228,19 @@ export default function SchoolScreen() {
 
     const handleNext1 = () => {
       if (!country) {
-        Alert.alert('Error', 'Please select a country');
+        setError('Please select a country');
         return;
       }
       if (!state) {
-        Alert.alert('Error', 'Please select a state');
+        setError('Please select a state');
         return;
       }
       if (!district) {
-        Alert.alert('Error', 'Please select a district');
+        setError('Please select a district');
         return;
       }
       if (!taluk) {
-        Alert.alert('Error', 'Please select a taluk');
+        setError('Please select a taluk');
         return;
       }
   
@@ -347,6 +348,7 @@ return (
     )}
     {currentStep === 5 && (
       <View style={{ alignItems: 'center' }}>
+         {error && <Text style={styles.errorText}>{error}</Text>} 
         <View style={{ flexDirection: 'row', justifyContent: 'space-between', width: '100%' }}>
           <TouchableOpacity style={styles.button} onPress={handleNext1}>
             <Text style={styles.buttonText}>Add School</Text>
@@ -360,10 +362,12 @@ return (
     </ScrollView>
        {/* Bottom Navigation */}
        <View style={styles.bottomNav}>
-        <Ionicons name="home" size={28} color="black" />
-         <TouchableOpacity onPress={() => setModalVisible(true)}>
-           <Ionicons name="person-outline" size={28} color="black" />
-         </TouchableOpacity>
+        <TouchableOpacity onPress={() => router.replace('/schoolScreen')}>
+          <Ionicons name="home" size={28} color="black" />
+        </TouchableOpacity>
+        <TouchableOpacity onPress={() => setModalVisible(true)}>
+          <Ionicons name="person-outline" size={28} color="black" />
+        </TouchableOpacity>
        </View>
 
        {/* Bottom Sheet Modal */}
@@ -382,7 +386,7 @@ return (
                  router.push('/changePassword');
                }}
              >
-               <Text style={styles.sheetText}>Change Password</Text>
+             <Text style={styles.sheetText}>Change Password</Text>
              </TouchableOpacity>
              <TouchableOpacity
                style={styles.sheetButton}
@@ -485,4 +489,9 @@ const styles = StyleSheet.create({
   sheetText: {
     fontSize: 16,
   },
+  errorText: {
+    color: 'red',
+    textAlign: 'center',
+    marginTop: 6,
+  }, 
 });

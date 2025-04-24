@@ -1,62 +1,74 @@
 import React, { useState, useEffect } from 'react';
 import * as DocumentPicker from 'expo-document-picker';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, Modal,Pressable, ActivityIndicator } from 'react-native';
 import { Ionicons, MaterialIcons } from '@expo/vector-icons';
-import { useLocalSearchParams } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import { API_URL } from '@env';
 import * as FileSystem from 'expo-file-system';
-import * as Sharing from 'expo-sharing';
-import { useRouter } from 'expo-router';
-type schoolObj = {
+import { Platform } from 'react-native';
+
+
+type SchoolObj = {
   HMName: string;
   HMCN: string;
   SchoolCode: string;
-  SchoolEmail:string|null;
-  Distance:number;
+  SchoolEmail: string | null;
+  Distance: number;
 };
+
 
 export default function SchoolDetails() {
   const router = useRouter();
-    const {schoolName, schoolpk, country, state, district, taluk,postalcode} = useLocalSearchParams();
-    // console.log({schoolName,schoolpk,taluk,postalcode});
-    const [school,setSchool] = useState<schoolObj|null>(null);
-    const [TotalStudents,setTotalStudents]=useState(null);
+  const {
+    schoolName,
+    schoolpk,
+    country,
+    state,
+    district,
+    taluk,
+    postalcode,
+  } = useLocalSearchParams();
 
-    useEffect(() => {
-          const fetchSchools = async () => {
-            try {
-              const response = await fetch(`${API_URL}/get-school`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ schoolpk })
-              });
-              const res = await response.json();
-              if(res.success){
-                setSchool(res.data);
-              }
-            } catch (err) {
-              console.error("Error fetching school:", err);
-            }
-          };
-          const fetchTotalStudents = async()=> {
-            try{
-            
-            const response = await fetch(`${API_URL}/get-total-students`,{
-              method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ schoolpk })
-            })
-            const res = await response.json();
-            if(res.success){
-              setTotalStudents(res.data.TotalStudents);
-            }
-            }catch(err){
-              console.error("Error fetching TotalStudents:", err);
-            }
-          }
-          fetchSchools();
-          fetchTotalStudents();
-        }, [schoolpk]);
+
+  const [school, setSchool] = useState<SchoolObj | null>(null);
+  const [totalStudents, setTotalStudents] = useState<number | null>(null);
+  const [uploading, setUploading] = useState(false);
+  const [modalVisible, setModalVisible] = useState(false);
+
+
+  useEffect(() => {
+    const fetchSchools = async () => {
+      try {
+        const response = await fetch(`${API_URL}/get-school`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ schoolpk }),
+        });
+        const res = await response.json();
+        if (res.success) setSchool(res.data);
+      } catch (err) {
+        console.error('Error fetching school:', err);
+      }
+    };
+
+    const fetchTotalStudents = async () => {
+      try {
+        const response = await fetch(`${API_URL}/get-total-students`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ schoolpk }),
+        });
+        const res = await response.json();
+        if (res.success) setTotalStudents(res.data.TotalStudents);
+      } catch (err) {
+        console.error('Error fetching TotalStudents:', err);
+      }
+    };
+
+    fetchSchools();
+    fetchTotalStudents();
+  }, [schoolpk]);
+
 
   const handleUpload = async () => {
     try {
@@ -65,37 +77,39 @@ export default function SchoolDetails() {
         copyToCacheDirectory: true,
       });
       if (result.canceled) return;
+
       const pickedFile = result.assets[0];
       if (!pickedFile.name.toLowerCase().endsWith('.csv')) {
         alert('Please select a CSV file only.');
         return;
       }
-      else{
-        const file = {
-          uri: result.assets[0].uri,
-          name: result.assets[0].name,
-          type: 'text/csv',
-        };
-        const formData = new FormData();
-        formData.append('file', file as any);
-        formData.append('schoolpk',schoolpk as any);
-        const response = await fetch(`${API_URL}/upload`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'multipart/form-data',
-          },
-          body: formData,
-        });
-        const data = await response.json();
-        if(data.success){
-          // console.log('Upload response:', data);
-          alert(data.message);
-        }
-      }
-      } catch (error) {
-        console.error('File upload error:', error);
-        alert('Something went wrong! Please try again later.');
-      }
+
+      setUploading(true); // show popup
+
+      const file = {
+        uri: pickedFile.uri,
+        name: pickedFile.name,
+        type: 'text/csv',
+      } as any;
+
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('schoolpk', schoolpk as any);
+
+      const response = await fetch(`${API_URL}/upload`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'multipart/form-data' },
+        body: formData,
+      });
+      const data = await response.json();
+
+      setUploading(false); // hide popup
+
+      alert(data.success ? `${file.name} uploaded successfully!` : data.message);
+    } catch (error) {
+      setUploading(false);
+      alert('Something went wrong! Please try again later.');
+    }
   };
 
   const handleDownload = async () => {
@@ -105,33 +119,73 @@ export default function SchoolDetails() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ schoolpk }),
       });
-  
+      if (!response.ok) throw new Error('Failed to fetch CSV data');
+
       const csv = await response.text();
-  
-      const fileUri = FileSystem.documentDirectory + `students_${schoolpk}.csv`;
-      await FileSystem.writeAsStringAsync(fileUri, csv, { encoding: FileSystem.EncodingType.UTF8 });
-  
-      if (!(await Sharing.isAvailableAsync())) {
-        alert('Sharing not available on this device');
-        return;
+      const fileName = `students_${schoolpk}_${Date.now()}.csv`;
+      const fileUri = FileSystem.documentDirectory + fileName;
+
+      await FileSystem.writeAsStringAsync(fileUri, csv, {
+        encoding: FileSystem.EncodingType.UTF8,
+      });
+
+      if (Platform.OS === 'android') {
+        const permissions =
+          await FileSystem.StorageAccessFramework.requestDirectoryPermissionsAsync();
+          console.log(permissions);
+        if (!permissions.granted) return;
+        try {
+          const uri = await FileSystem.StorageAccessFramework.createFileAsync(
+            permissions.directoryUri,
+            fileName,
+            'text/csv'
+          );
+          await FileSystem.writeAsStringAsync(uri, csv, {
+            encoding: FileSystem.EncodingType.UTF8,
+          });
+          alert('File saved successfully!');
+        } catch (error) {
+          console.error('Error saving file:', error);
+          alert('Failed to save file');
+        }
+      } else {
+        alert(`File saved to ${fileUri}`);
       }
-      await Sharing.shareAsync(fileUri);
     } catch (err) {
       console.error('Download error:', err);
       alert('Failed to download student CSV.');
     }
   };
 
-  
+
   return (
     <View style={styles.container}>
+      {/* Uploading Popup */}
+      <Modal visible={uploading} transparent animationType="fade">
+        <View style={styles.backdrop}>
+          <View style={styles.popup}>
+            <ActivityIndicator size="large" />
+            <Text style={styles.popupText}>Uploading…</Text>
+          </View>
+        </View>
+      </Modal>
+
       <Text style={styles.schoolName}>{schoolName}</Text>
       <Text style={styles.uploadedText}>
-        Total students uploaded : <Text style={{ color: '#5a3ff0', fontWeight: 'bold' }}>{TotalStudents?TotalStudents:"Loading..."}</Text>
+        Total students uploaded :{' '}
+        <Text style={{ color: '#5a3ff0', fontWeight: 'bold' }}>
+          {totalStudents ?? 'Loading...'}
+        </Text>
       </Text>
 
       <TouchableOpacity style={styles.downloadBtn} onPress={handleDownload}>
-        <Ionicons name="download-outline" size={24} color="white" />
+        <Ionicons
+          name="download-outline"
+          size={24}
+          color="white"
+          style={{ marginRight: 6 }}
+        />
+        <Text style={styles.downloadText}>Download</Text>
       </TouchableOpacity>
 
 
@@ -140,105 +194,193 @@ export default function SchoolDetails() {
         <Text style={styles.uploadText}>Upload Spreadsheet (.csv)</Text>
       </TouchableOpacity>
 
-      {school ?
-      (
+      {school ? (
         <View style={styles.detailsCard}>
           <View style={styles.detailsHeader}>
-            <Ionicons name="person-circle-outline" size={22} color="black" />
-              <Text style={styles.detailsTitle}>Details</Text>
-              <MaterialIcons name="edit" size={30} color="black" style={{ marginLeft: 'auto' }}
-                  onPress={() =>
-                    router.push({
-                      pathname: '/schoolUpdateForm',
-                      params: {
-                        schoolpk,
-                        schoolCode: school?.SchoolCode,
-                        schoolName,
-                        HMName: school?.HMName,
-                        HMCN: school?.HMCN,
-                        distance: school?.Distance,
-                        schoolEmail: school?.SchoolEmail,
-                        country,
-                        state,
-                        district,
-                        taluk,
-                        postalcode
-                      },
-                    })
-                  }
-                />
+            <Ionicons name="school-outline" size={22} color="black" />
+            <Text style={styles.detailsTitle}>Details</Text>
+            <MaterialIcons
+              name="edit"
+              size={30}
+              color="black"
+              style={{ marginLeft: 'auto' }}
+              onPress={() =>
+                router.replace({
+                  pathname: '/schoolUpdateForm',
+                  params: {
+                    schoolpk,
+                    schoolCode: school?.SchoolCode,
+                    schoolName,
+                    HMName: school?.HMName,
+                    HMCN: school?.HMCN,
+                    distance: school?.Distance,
+                    schoolEmail: school?.SchoolEmail,
+                    country,
+                    state,
+                    district,
+                    taluk,
+                    postalcode,
+                  },
+                })
+              }
+            />
+          </View>
+          <View style={{ height: 2, backgroundColor: '#ccc', marginVertical: 4 }} />
+          <View style={styles.detailBody}>
+            <Text>Headmaster: {school?.HMName}</Text>
+            <Text>Contact: {school?.HMCN}</Text>
+            <Text>School Code: {school?.SchoolCode}</Text>
+            <Text>Taluk: {taluk}</Text>
+            <Text>District Code: {postalcode}</Text>
+            <Text>Email: {school?.SchoolEmail}</Text>
+          </View>
         </View>
-        <View style={styles.detailBody}>
-          <Text>Headmaster: {school?.HMName}</Text>
-          <Text>Contact: {school?.HMCN}</Text>
-          <Text>School Code: {school?.SchoolCode}</Text>
-          <Text>Taluk: {taluk}</Text>
-          <Text>District Code: {postalcode}</Text>
-          <Text>Email: {school?.SchoolEmail}</Text>
-        </View>
-      </View>
       ) : (
         <Text>Loading school details...</Text>
       )}
-
-        
-
+            <View style={styles.bottomNav}>
+              <TouchableOpacity onPress={() => router.push('/schoolScreen')}>
+                <Ionicons name="home" size={28} color="black" />
+              </TouchableOpacity>
+              <TouchableOpacity onPress={() => setModalVisible(true)}>
+                <Ionicons name="person-outline" size={28} color="black" />
+              </TouchableOpacity>
+             </View>
+      
+             {/* Bottom Sheet Modal */}
+             <Modal
+               animationType="slide"
+               transparent={true}
+               visible={modalVisible}
+               onRequestClose={() => setModalVisible(false)}
+             >
+               <Pressable style={styles.modalOverlay} onPress={() => setModalVisible(false)}>
+                 <View style={styles.bottomSheet}>
+                   <TouchableOpacity
+                     style={styles.sheetButton}
+                     onPress={() => {
+                       setModalVisible(false);
+                       router.push('/changePassword');
+                     }}
+                   >
+                   <Text style={styles.sheetText}>Change Password</Text>
+                   </TouchableOpacity>
+                   <TouchableOpacity
+                     style={styles.sheetButton}
+                     onPress={() => {
+                       setModalVisible(false);
+                       router.replace('/');
+                     }}
+                   >
+                     <Text style={styles.sheetText}>Logout</Text>
+                   </TouchableOpacity>
+                 </View>
+               </Pressable>
+             </Modal>
     </View>
   );
 }
 
+
 const styles = StyleSheet.create({
-  container: {
-    padding: 16,
-    backgroundColor: '#fff',
-    flex: 1,
-  },
-  schoolName: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    textAlign: 'center',
-  },
-  uploadedText: {
-    textAlign: 'center',
-    marginVertical: 8,
-  },
+  container: { padding: 16, backgroundColor: '#fff', flex: 1 },
+  schoolName: { fontSize: 18, fontWeight: 'bold', textAlign: 'center', marginVertical:3},
+  uploadedText: { textAlign: 'center', marginVertical: 8 },
   downloadBtn: {
+    flexDirection: 'row',      
+    alignItems: 'center',
     alignSelf: 'center',
     backgroundColor: '#b9aaff',
     borderRadius: 10,
-    padding: 6,
-    marginBottom: 12,
+    paddingVertical: 6,
+    paddingHorizontal: 14,
+    marginBottom: 8,
+    marginTop:8,
   },
+  downloadText: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: '600',
+  },  
   uploadBtn: {
     flexDirection: 'row',
     backgroundColor: '#c9dff3',
     borderRadius: 6,
     padding: 10,
     alignItems: 'center',
-    marginBottom: 10,
+    marginTop: 8,
+    marginBottom:16,
   },
-  uploadText: {
+  uploadText: { 
     marginLeft: 8,
     fontSize: 14,
-    fontWeight: '500',
+    fontWeight: '500'
   },
-  detailsCard: {
-    backgroundColor: '#e0e0e0',
+  detailsCard: { 
+    backgroundColor:
+    '#e0e0e0',
     borderRadius: 6,
-    padding: 12,
+    padding: 12 
   },
   detailsHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 6,
+    flexDirection: 'row', 
+    alignItems: 'center', 
+    marginBottom: 6 
   },
-  detailsTitle: {
+  detailsTitle: { 
     fontSize: 16,
-    fontWeight: '600',
-    marginLeft: 6,
+    fontWeight: '600', 
+    marginLeft: 6 
   },
-  detailBody: {
-    marginTop: 4,
-    paddingLeft: 4,
+  detailBody: { 
+    marginTop: 4, 
+    paddingLeft: 4 
   },
+  backdrop: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0,0,0,0.4)',
+  },
+  popup: {
+    width: 180,
+    padding: 20,
+    borderRadius: 10,
+    backgroundColor: '#fff',
+    alignItems: 'center',
+  },
+  popupText: { 
+    marginTop: 12, 
+    fontSize: 16, 
+    fontWeight: '600' 
+  },
+  bottomNav: {
+    position: 'absolute',
+    bottom: 10,
+    width: '100%',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingHorizontal: 50,
+  },
+  modalOverlay: {
+    flex: 1,
+    justifyContent: 'flex-end',
+    backgroundColor: 'rgba(0,0,0,0.3)',
+  },
+  bottomSheet: {
+    backgroundColor: '#fff',
+    borderTopLeftRadius: 15,
+    borderTopRightRadius: 15,
+    paddingVertical: 20,
+    paddingHorizontal: 25,
+  },
+  sheetButton: {
+    backgroundColor: '#f2f2f2',
+    padding: 15,
+    borderRadius: 10,
+    marginBottom: 10,
+  },
+  sheetText: {
+    fontSize: 16,
+  },  
 });

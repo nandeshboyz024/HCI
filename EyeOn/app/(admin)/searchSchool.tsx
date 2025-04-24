@@ -1,9 +1,10 @@
 import React, { useState, useEffect} from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet,Modal,Pressable } from 'react-native';
 import { useLocalSearchParams } from 'expo-router';
 import { Dropdown } from 'react-native-element-dropdown';
 import { API_URL } from '@env';
 import { useRouter } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
 
 type SchoolItem = {
     label: string;
@@ -14,10 +15,12 @@ type SchoolItem = {
 export default function SearchSchool(){
   const router = useRouter();
   const { country, state, district, taluk, talukcode, postalcode} = useLocalSearchParams();
+  const [modalVisible, setModalVisible] = useState(false);
   const [schoolName, setSchoolName] = useState<string|null>(null);
   const [schoolpk,setSchoolpk] = useState<number|null>(null);
 
   const [schools, setSchools] = useState<[number, string][]>([]);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
       const fetchSchools = async () => {
@@ -51,6 +54,7 @@ export default function SearchSchool(){
   }
 
   const handleSchoolChange = (item:SchoolItem) => {
+    setError(null);
     setSchoolName(item.value);
     setSchoolpk(item.code);
   };
@@ -70,7 +74,7 @@ export default function SearchSchool(){
             },
           });
     } else {
-      console.log('Please select a school first');
+      setError('Please select a school first');
     }
   };
 
@@ -99,10 +103,50 @@ export default function SearchSchool(){
           value={schoolName}
           onChange={handleSchoolChange}
         />
+        {error && <Text style={styles.errorText}>{error}</Text>} 
         <TouchableOpacity style={styles.button} onPress={handleGoToSchool}>
           <Text style={styles.buttonText}>Go to School</Text>
         </TouchableOpacity>
       </View>
+      <View style={styles.bottomNav}>
+        <TouchableOpacity onPress={() => router.replace('/schoolScreen')}>
+          <Ionicons name="home" size={28} color="black" />
+        </TouchableOpacity>
+        <TouchableOpacity onPress={() => setModalVisible(true)}>
+          <Ionicons name="person-outline" size={28} color="black" />
+        </TouchableOpacity>
+       </View>
+
+       {/* Bottom Sheet Modal */}
+       <Modal
+         animationType="slide"
+         transparent={true}
+         visible={modalVisible}
+         onRequestClose={() => setModalVisible(false)}
+       >
+         <Pressable style={styles.modalOverlay} onPress={() => setModalVisible(false)}>
+           <View style={styles.bottomSheet}>
+             <TouchableOpacity
+               style={styles.sheetButton}
+               onPress={() => {
+                 setModalVisible(false);
+                 router.push('/changePassword');
+               }}
+             >
+             <Text style={styles.sheetText}>Change Password</Text>
+             </TouchableOpacity>
+             <TouchableOpacity
+               style={styles.sheetButton}
+               onPress={() => {
+                 setModalVisible(false);
+                 router.replace('/');
+               }}
+             >
+               <Text style={styles.sheetText}>Logout</Text>
+             </TouchableOpacity>
+           </View>
+         </Pressable>
+       </Modal>
     </>
   );
 };
@@ -167,5 +211,39 @@ const styles = StyleSheet.create({
     height: 40,
     fontSize: 16,
   },
+  errorText: {
+    color: 'red',
+    textAlign: 'center',
+    marginTop: 6,
+  },
+  bottomNav: {
+    position: 'absolute',
+    bottom: 10,
+    width: '100%',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingHorizontal: 50,
+  },
+  modalOverlay: {
+    flex: 1,
+    justifyContent: 'flex-end',
+    backgroundColor: 'rgba(0,0,0,0.3)',
+  },
+  bottomSheet: {
+    backgroundColor: '#fff',
+    borderTopLeftRadius: 15,
+    borderTopRightRadius: 15,
+    paddingVertical: 20,
+    paddingHorizontal: 25,
+  },
+  sheetButton: {
+    backgroundColor: '#f2f2f2',
+    padding: 15,
+    borderRadius: 10,
+    marginBottom: 10,
+  },
+  sheetText: {
+    fontSize: 16,
+  },  
 });
 
