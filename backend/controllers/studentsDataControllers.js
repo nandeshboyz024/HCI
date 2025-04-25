@@ -34,7 +34,7 @@ export const uploadStudents = async (req, res) => {
       'Section'
     ];
     if (records.length === 0) {
-      return res.status(400).json({ message: 'CSV file is empty' });
+      return res.status(400).json({ success:false,message: 'CSV file is empty' });
     }
     const actualColumns = Object.keys(records[0]);
     if (
@@ -42,12 +42,14 @@ export const uploadStudents = async (req, res) => {
       !expectedColumns.every((col, idx) => col === actualColumns[idx])
     ) {
       return res.status(400).json({
+        success: false,
         message: 'CSV columns do not match the expected order or names',
-        expected: expectedColumns,
-        actual: actualColumns
-      });
+        expected: expectedColumns.join(', '),
+        actual: actualColumns.join(', ')
+      });      
     }
-
+    const initialCountResult = await sql`SELECT COUNT(*) FROM "Students" WHERE "Schoolpk"=${schoolpk}`;
+    const initialCount = parseInt(initialCountResult[0].count);
     // Process each record
     for (const row of records) {
       const { StudentId, StudentName, ParentName, Age, Sex, Class: classId, Section} = row;
@@ -88,18 +90,23 @@ export const uploadStudents = async (req, res) => {
             END
           );
       `;
-      console.log("added");
     }
+    const finalCountResult = await sql`SELECT COUNT(*) FROM "Students" WHERE "Schoolpk"=${schoolpk}`;
+    const finalCount = parseInt(finalCountResult[0].count);
 
+    const newStudentsAdded = finalCount - initialCount;
+    console.log(newStudentsAdded);
+    console.log(finalCount);
     return res.status(200).json({
       success:true,
       message: 'Data uploaded successfully',
-      totalRecords: records.length
+      newAddedRecords: newStudentsAdded, 
+      totalRecords: finalCount
     });
 
   } catch (err) {
     console.error('Upload error:', err);
-    return res.status(500).json({ message: 'Upload failed!', error: err.message });
+    return res.status(500).json({ success:false, message: 'Upload failed!', error: err.message });
   }
 };
 

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import * as DocumentPicker from 'expo-document-picker';
-import { View, Text, TouchableOpacity, StyleSheet, Modal,Pressable, ActivityIndicator } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, Modal,Pressable, ActivityIndicator, Alert } from 'react-native';
 import { Ionicons, MaterialIcons } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { API_URL } from '@env';
@@ -80,7 +80,7 @@ export default function SchoolDetails() {
 
       const pickedFile = result.assets[0];
       if (!pickedFile.name.toLowerCase().endsWith('.csv')) {
-        alert('Please select a CSV file only.');
+        Alert.alert('Error','Please select a CSV file only.');
         return;
       }
 
@@ -102,13 +102,24 @@ export default function SchoolDetails() {
         body: formData,
       });
       const data = await response.json();
-
       setUploading(false); // hide popup
-
-      alert(data.success ? `${file.name} uploaded successfully!` : data.message);
+      if(data.success) {
+        console.log(data.totalRecords);
+        console.log(data.newAddedRecords);
+        setTotalStudents(data.totalRecords);
+        Alert.alert('Success',`${file.name} uploaded successfully!\n${data.newAddedRecords} New Entry Added.`);
+      }
+      else{
+        if(data.message=='CSV columns do not match the expected order or names'){
+          Alert.alert('Error',`${data.message}\n Expected Columns: ${data.expected}\n Actual Columns: ${data.actual}`);
+        }
+        else{
+          Alert.alert('Error',data.message);
+        }
+      }
     } catch (error) {
       setUploading(false);
-      alert('Something went wrong! Please try again later.');
+      Alert.alert('Error','Something went wrong! Please try again later.');
     }
   };
 
@@ -143,17 +154,17 @@ export default function SchoolDetails() {
           await FileSystem.writeAsStringAsync(uri, csv, {
             encoding: FileSystem.EncodingType.UTF8,
           });
-          alert('File saved successfully!');
+          Alert.alert('Success','File saved successfully!');
         } catch (error) {
           console.error('Error saving file:', error);
-          alert('Failed to save file');
+          Alert.alert('Error','Failed to save file');
         }
       } else {
-        alert(`File saved to ${fileUri}`);
+        Alert.alert('Error',`File saved to ${fileUri}`);
       }
     } catch (err) {
       console.error('Download error:', err);
-      alert('Failed to download student CSV.');
+      Alert.alert('Error','Failed to download student CSV.');
     }
   };
 
