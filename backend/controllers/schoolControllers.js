@@ -58,7 +58,7 @@ export const addSchool = async (req, res) => {
       RETURNING "pk";
     `;
       const pk = result[0]?.pk;
-      console.log(pk);
+      // console.log(pk);
       res.status(200).json({
       success: true,
       message: "School added successfully",
@@ -209,7 +209,7 @@ export const primaryScreeningSubmitForm = async (req, res) => {
   try {
     const {satsId, reVision , leVision }  = req.body;
 
-    console.log("Received data: ", req.body);
+    // console.log("Received data: ", req.body);
     await sql`UPDATE "primaryScreeningData"
 SET
     "reVision" = ${reVision},
@@ -227,7 +227,7 @@ WHERE
 
 
     const testResultStatus = primaryResult[0].testResultStatus;
-    console.log(testResultStatus);
+    // console.log(testResultStatus);
 
     // Check if secondary evaluation is required
     if (testResultStatus === 'Secondary Evaluation Required') {
@@ -323,11 +323,11 @@ export const secondaryScreeningSubmitForm = async (req, res) => {
 
     const normalVisions = ['6/6', '6/7.5'];
     const isNormal = normalVisions.includes(rightEyeVision) && normalVisions.includes(leftEyeVision);
-    console.log("Is normal vision: ", isNormal);
+    // console.log("Is normal vision: ", isNormal);
     
     if (isNormal) {
       // Update testResultStatus to 'Normal' in primaryScreeningData
-      console.log("Updating primaryScreeningData to Normal");
+      // console.log("Updating primaryScreeningData to Normal");
 
       await sql`
         UPDATE "primaryScreeningData"
