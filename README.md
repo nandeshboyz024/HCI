@@ -22,7 +22,7 @@ Before you begin, ensure you have the following installed on your machine:
 
 1. **Clone the Repository**:
    ```bash
-   git clone https://github.com/your-username/vision-it-solutions.git
+   git clone https://github.com/nandeshboyz024/HCI.git
    cd HCI/EyeOn
    ```
 
