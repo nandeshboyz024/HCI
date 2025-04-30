@@ -26,3 +26,24 @@ Before you begin, ensure you have the following installed on your machine:
 2. **Install Dependencies**:
    ```bash
     npm install
+3. **Run the Frontend**:
+   ```bash
+    npx expo start
+
+#### This will start the Expo development server, and you can run the app on an emulator or a physical device using the Expo Go app.
+
+## Setting Up the Backend
+
+1. **Navigate to the Backend Directory**:
+   ```bash
+   cd vision-it-solutions/Backend
+
+2. **Install Dependencies**:
+   ```bash
+    npm install
+   
+3. **Run the Backend Server**:
+   ```bash
+    npm run dev
+
+This will start the backend server, and it will be ready to handle requests from the frontend.
