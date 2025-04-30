@@ -23,7 +23,7 @@ Before you begin, ensure you have the following installed on your machine:
 1. **Clone the Repository**:
    ```bash
    git clone https://github.com/your-username/vision-it-solutions.git
-   cd vision-it-solutions/EyeOn
+   cd HCI/EyeOn
    ```
 
 2. **Install Dependencies**:
@@ -46,7 +46,7 @@ This will start the Expo development server, and you can run the app on an emula
 
 1. **Navigate to the Backend Directory**:
    ```bash
-   cd vision-it-solutions/Backend
+   cd HCI/Backend
    ```
 
 2. **Install Dependencies**:
