@@ -4,8 +4,8 @@ import sql from '../db.js';
 
 export const uploadStudents = async (req, res) => {
   try {
-    console.log('File:', req.file);
-    console.log('School PK: ', req.body.schoolpk);
+    // console.log('File:', req.file);
+    // console.log('School PK: ', req.body.schoolpk);
 
     if (!req.file || !req.file.buffer) {
       return res.status(400).json({ message: 'No file uploaded' });
@@ -95,8 +95,8 @@ export const uploadStudents = async (req, res) => {
     const finalCount = parseInt(finalCountResult[0].count);
 
     const newStudentsAdded = finalCount - initialCount;
-    console.log(newStudentsAdded);
-    console.log(finalCount);
+    // console.log(newStudentsAdded);
+    // console.log(finalCount);
     return res.status(200).json({
       success:true,
       message: 'Data uploaded successfully',
@@ -129,7 +129,7 @@ export const getTotalStudents = async (req, res) =>{
 export const downloadStudents = async (req, res) => {
   try {
     const { schoolpk } = req.body;
-    console.log(schoolpk);
+    // console.log(schoolpk);
 
     const students = await sql`
       SELECT "StudentId", "StudentName", "ParentName", "Age", "Sex", "Class", "Section"

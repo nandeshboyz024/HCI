@@ -43,7 +43,7 @@ export default function SearchSchool(){
 
 
 
-  console.log(country, state, district, taluk, talukcode, postalcode);
+  // console.log(country, state, district, taluk, talukcode, postalcode);
 
   if (!country || !state || !district || !taluk) {
     return (

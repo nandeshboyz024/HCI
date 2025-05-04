@@ -138,7 +138,7 @@ export default function SchoolScreen() {
 
   const handleCountryChange = (item: DropdownItem) => {
     // const item = value;
-    console.log("Selected country:", item.value);
+    // console.log("Selected country:", item.value);
 
     setCountry(item.value);
     // setCountry(item.value);
@@ -212,7 +212,7 @@ export default function SchoolScreen() {
         return;
       }
   
-      console.log(country, state, district, taluk, talukcode);
+      // console.log(country, state, district, taluk, talukcode);
       router.push({
         pathname: '/searchSchool',
         params: {
@@ -244,7 +244,7 @@ export default function SchoolScreen() {
         return;
       }
   
-      console.log(country, state, district, taluk, talukcode);
+      // console.log(country, state, district, taluk, talukcode);
       router.push({
         pathname: '/schoolForm',
         params: {

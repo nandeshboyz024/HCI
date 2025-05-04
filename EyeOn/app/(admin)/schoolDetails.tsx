@@ -104,8 +104,6 @@ export default function SchoolDetails() {
       const data = await response.json();
       setUploading(false); // hide popup
       if(data.success) {
-        console.log(data.totalRecords);
-        console.log(data.newAddedRecords);
         setTotalStudents(data.totalRecords);
         Alert.alert('Success',`${file.name} uploaded successfully!\n${data.newAddedRecords} New Entry Added.`);
       }
