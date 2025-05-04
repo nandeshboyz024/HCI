@@ -1,15 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, FlatList, TextInput } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, FlatList, TextInput, ActivityIndicator } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons'; // Import the icon library
 import { API_URL } from '@env'; // Ensure you have the correct path to your .env file
-// import { useLocalSearchParams } from 'expo-router'; // Ensure you have the correct path to your router
 
 const SecondaryScreening = () => {
-  const { selectedSchoolpk,
-    selectedClass,
-    selectedSection,
-    selectedSchoolName } = useLocalSearchParams();
+  const { selectedSchoolpk, selectedClass, selectedSection, selectedSchoolName } = useLocalSearchParams();
   const router = useRouter();
   const [students, setStudents] = useState([]);
   const [filteredStudents, setFilteredStudents] = useState([]);
@@ -17,9 +13,11 @@ const SecondaryScreening = () => {
   const [remainingStudents, setRemainingStudents] = useState([]);
   const [testedStudents, setTestedStudents] = useState([]);
   const [activeTab, setActiveTab] = useState('remaining'); // 'remaining' or 'tested'
+  const [loading, setLoading] = useState(true); // Add loading state
 
   useEffect(() => {
     const fetchStudents = async () => {
+      setLoading(true); // Set loading to true before fetching data
       try {
         const response = await fetch(`${API_URL}/getStudentsForSecondaryScreening`, {
           method: 'POST',
@@ -31,7 +29,6 @@ const SecondaryScreening = () => {
           }),
         });
         console.log("Response:", response);
-
 
         if (response.ok) {
           const result = await response.json();
@@ -51,6 +48,8 @@ const SecondaryScreening = () => {
         }
       } catch (error) {
         console.error('Error fetching students:', error);
+      } finally {
+        setLoading(false); // Set loading to false after data is fetched
       }
     };
 
@@ -98,11 +97,11 @@ const SecondaryScreening = () => {
         studentLeftEyeCyl: student.leftEyeCYL,
         studentLeftEyeAxis: student.leftEyeAXIS,
         studentLeftEyeVision: student.leftEyeVision,
-        
+
         selectedRefractiveError: student.refractiveError || '', // Default to empty string if not available
         selectedSpectaclesFrameCode: student.spectaclesFrameCode || '', // Default to empty string if not available
         selectedMobileNumber: student.mobileNumber || '', // Default to empty string if not available
-        
+
         selectedSchoolpk: selectedSchoolpk,
         selectedClass: selectedClass,
         selectedSection: selectedSection,
@@ -114,32 +113,42 @@ const SecondaryScreening = () => {
   const renderStudentItem = ({ item }) => (
     <TouchableOpacity style={styles.studentItem} onPress={() => handleStudentPress(item)}>
       <View style={styles.studentIcon}>
-        <Text style={styles.studentIconText}>{item.StudentName.charAt(0).toUpperCase()}</Text>
+              <Ionicons name="person-circle-outline" size={40} color="#000" />
       </View>
       <View style={styles.studentDetails}>
         <Text style={styles.studentName}>Name: {item.StudentName}</Text>
-        <Text style={styles.studentParent}>Parent: {item.ParentName}</Text>
-        <Text style={styles.studentAgeSex}>Age: {item.Age}, Sex: {item.Sex}</Text>
-
+        <Text style={styles.studentParent}>Parent Name: {item.ParentName}</Text>
+        <View style={{ flexDirection: 'row', justifyContent: 'flex-start', paddingVertical: 5 }}>
+          <Text style={[styles.studentAge, { marginRight: 50 }]}>Age: {item.Age}</Text>
+          <Text style={styles.studentSex}>Sex: {item.Sex}</Text>
+        </View>
         {activeTab === 'remaining' && (
           <>
             <Text style={styles.studentStatus}>Status: {item.primaryTestResultStatus}</Text>
+            <View style={{ flexDirection: 'row', marginTop: 5 }}>
             {item.rightEyeVision && <Text style={styles.studentVision}>RE Vision: {item.rightEyeVision}</Text>}
             {item.leftEyeVision && <Text style={styles.studentVision}>LE Vision: {item.leftEyeVision}</Text>}
+            </View>   
           </>
         )}
 
         {activeTab === 'tested' && (
           <>
-          <Text style={styles.studentAgeSex}>Mobile: {item.mobileNumber}</Text>
+            <Text style={styles.studentAgeSex}>Mobile No.: {item.mobileNumber}</Text>
             <Text style={styles.studentEyeDetails}>Right Eye:</Text>
-            <Text style={styles.studentEyeDetails}>
-              SPH: {item.rightEyeSPH}, CYL: {item.rightEyeCYL}, AXIS: {item.rightEyeAXIS}, VISION: {item.rightEyeVision}
-            </Text>
+            <View style={{ flexDirection: 'row', marginTop: 5 }}>
+              <Text style={styles.studentVision}>SPH: {item.rightEyeSPH}</Text>
+              <Text style={styles.studentVision}>CYL: {item.rightEyeCYL}</Text>
+              <Text style={styles.studentVision}>AXIS: {item.rightEyeAXIS}</Text>
+              <Text style={styles.studentVision}>VISION: {item.rightEyeVision}</Text>
+            </View>
             <Text style={styles.studentEyeDetails}>Left Eye:</Text>
-            <Text style={styles.studentEyeDetails}>
-              SPH: {item.leftEyeSPH}, CYL: {item.leftEyeCYL}, AXIS: {item.leftEyeAXIS}, VISION: {item.leftEyeVision}
-            </Text>
+            <View style={{ flexDirection: 'row', marginTop: 5 }}>
+              <Text style={styles.studentVision}>SPH: {item.leftEyeSPH}</Text>
+              <Text style={styles.studentVision}>CYL: {item.leftEyeCYL}</Text>
+              <Text style={styles.studentVision}>AXIS: {item.leftEyeAXIS}</Text>
+              <Text style={styles.studentVision}>VISION: {item.leftEyeVision}</Text>
+            </View>
             <Text style={styles.studentRemark}>Remark: {item.refractiveError}</Text>
           </>
         )}
@@ -147,13 +156,22 @@ const SecondaryScreening = () => {
     </TouchableOpacity>
   );
 
+  if (loading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#0000ff" />
+        {/* <Text style={styles.loadingText}>Loading...</Text> */}
+      </View>
+    );
+  }
+
   return (
     <View style={styles.container}>
       <Text style={styles.title}>{selectedSchoolName}</Text>
       <Text style={styles.subtitle}>Class {selectedClass}</Text>
       <Text style={styles.subtitle}>Section {selectedSection}</Text>
       <Text style={styles.info}>
-        <Text style={{ color: '#0497F3' }}>{remainingStudents.length}</Text> / {remainingStudents.length + testedStudents.length}
+        <Text style={{ color: '#0497F3' }}>{testedStudents.length}</Text> / {remainingStudents.length + testedStudents.length}
       </Text>
 
       <View style={styles.buttonContainer}>
@@ -192,6 +210,17 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 20,
     backgroundColor: '#fff',
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#fff',
+  },
+  loadingText: {
+    marginTop: 10,
+    fontSize: 18,
+    color: '#000',
   },
   title: {
     fontSize: 24,
@@ -265,8 +294,6 @@ const styles = StyleSheet.create({
   studentIcon: {
     width: 40,
     height: 40,
-    borderRadius: 20,
-    backgroundColor: '#007AFF',
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: 10,
@@ -280,7 +307,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   studentName: {
-    fontSize: 16,
+    fontSize: 20,
     fontWeight: 'bold',
   },
   studentParent: {
@@ -298,16 +325,27 @@ const styles = StyleSheet.create({
   studentVision: {
     fontSize: 14,
     color: '#555',
+    marginRight: 20
   },
   studentEyeDetails: {
     fontSize: 14,
-    color: '#555',
+    color: '#000',
+    fontWeight: 'bold',
+    marginTop: 10,
   },
   studentRemark: {
     fontSize: 14,
-    color: '#555',
+    color: '#007AFF',
     marginTop: 10,
   },
+  studentAge: {
+    fontSize: 14,
+    color: '#555',
+  },
+  studentSex: {
+    fontSize: 14,
+    color: '#555',
+  }
 });
 
 export default SecondaryScreening;

@@ -1,167 +1,211 @@
-import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, TouchableOpacity, StyleSheet, ActivityIndicator, Alert } from 'react-native';
 import { Dropdown } from 'react-native-element-dropdown';
 import { useLocalSearchParams } from 'expo-router';
 import { router } from 'expo-router';
-import { useEffect } from 'react';
-// import axios from 'axios';
 import { API_URL } from '@env';
-// import { useRouter } from 'expo-router';
 
 const Screener = () => {
   const { country, state, district, taluk, talukcode, selectedSchoolName, selectedSchoolpk } = useLocalSearchParams();
-  
+
   const [selectedClass, setSelectedClass] = useState(null);
   const [selectedSection, setSelectedSection] = useState(null);
   const [selectedTesterType, setSelectedTesterType] = useState(null);
 
-  const [totalStudent, setTotalStudent] = useState(885);
-  const [primaryScreenedStudents, setPrimaryScreenedStudents] = useState(234);
-  const [secondaryScreenedStudents, setSecondaryScreenedStudents] = useState(197);
+  const [totalStudent, setTotalStudent] = useState(0);
+  const [primaryScreenedStudents, setPrimaryScreenedStudents] = useState(0);
+  const [secondaryScreenedStudents, setSecondaryScreenedStudents] = useState(0);
 
-  // const classes = [
-  //   { label: 'Class 1', value: 1 },
-  //   { label: 'Class 2', value: 2 },
-  //   { label: 'Class 3', value: 3 },
-  //   // Add more classes as needed
-  // ];
+  const [classes, setClasses] = useState([]);
+  const [sections, setSections] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const [classes, setClasses] = React.useState([]);
-  
-useEffect(() => {
-  const fetchClasses = async () => {
-    try {
-      const response = await fetch(`${API_URL}/getClasses`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ schoolpk: selectedSchoolpk })
-      });
+  useEffect(() => {
+    const fetchClasses = async () => {
+      try {
+        const response = await fetch(`${API_URL}/getClasses`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ schoolpk: selectedSchoolpk })
+        });
 
-      if (response.ok) {
-        const result = await response.json();
-        if (result.success) {
-          // Transform the data into the desired format
-          const transformedClasses = result.data.map(item => ({
-            label: `Class ${item.Class}`,
-            value: item.Class // Ensure the value is a number
-          }));
-          setClasses(transformedClasses);
+        if (response.ok) {
+          const result = await response.json();
+          if (result.success) {
+            const transformedClasses = result.data.map(item => ({
+              label: `Class ${item.Class}`,
+              value: item.Class
+            }));
+            setClasses(transformedClasses);
+          } else {
+            console.error('No data found or API response indicates failure.');
+          }
         } else {
-          console.error('No data found or API response indicates failure.');
+          console.error('Failed to fetch classes:', response.statusText);
         }
-      } else {
-        console.error('Failed to fetch classes:', response.statusText);
+      } catch (error) {
+        console.error('Error fetching classes:', error);
       }
-    } catch (error) {
-      console.error('Error fetching classes:', error);
-    }
-  };
+    };
 
-  if (selectedSchoolpk) {
-    fetchClasses();
-  }
-}, [selectedSchoolpk]);
+    const fetchTotalStudents = async () => {
+      try {
+        const response = await fetch(`${API_URL}/getTotalStudentsBySchool`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ schoolpk: selectedSchoolpk })
+        });
 
-
-
-  // const sections = [
-  //   { label: 'Section A', value: 'A' },
-  //   { label: 'Section B', value: 'B' },
-  //   { label: 'Section C', value: 'C' },
-  //   // Add more sections as needed
-  // ];
-
-const [sections, setSections] = useState([]);
-
-useEffect(() => {
-  const fetchSections = async () => {
-    try {
-      const response = await fetch(`${API_URL}/getSections`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ schoolpk: selectedSchoolpk, className: selectedClass })
-      });
-
-      if (response.ok) {
-        const result = await response.json();
-        console.log("result",result);
-
-        if (result.success) {
-          // Transform the data into the desired format
-          const transformedSections = result.data[0].Sections.map(section => ({
-            label: `Section ${section}`,
-            value: section
-          }));
-          setSections(transformedSections);
+        if (response.ok) {
+          const result = await response.json();
+          if (result.success) {
+            setTotalStudent(result.data);
+          } else {
+            console.error('No data found or API response indicates failure.');
+          }
         } else {
-          console.error('No data found or API response indicates failure.');
+          console.error('Failed to fetch total students:', response.statusText);
         }
-      } else {
-        console.error('Failed to fetch sections:', response.statusText);
+      } catch (error) {
+        console.error('Error fetching total students:', error);
       }
-    } catch (error) {
-      console.error('Error fetching sections:', error);
+    };
+
+    const fetchPrimaryScreenedStudents = async () => {
+      try {
+        const response = await fetch(`${API_URL}/getPrimaryTestedCountStudentsBySchool`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ schoolpk: selectedSchoolpk })
+        });
+
+        if (response.ok) {
+          const result = await response.json();
+          if (result.success) {
+            setPrimaryScreenedStudents(result.data);
+          } else {
+            console.error('No data found or API response indicates failure.');
+          }
+        } else {
+          console.error('Failed to fetch primary screened students:', response.statusText);
+        }
+      } catch (error) {
+        console.error('Error fetching primary screened students:', error);
+      }
+    };
+
+    const fetchSecondaryScreenedStudents = async () => {
+      try {
+        const response = await fetch(`${API_URL}/getSecondaryTestedCountStudentsBySchool`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ schoolpk: selectedSchoolpk })
+        });
+
+        if (response.ok) {
+          const result = await response.json();
+          if (result.success) {
+            setSecondaryScreenedStudents(result.data);
+          } else {
+            console.error('No data found or API response indicates failure.');
+          }
+        } else {
+          console.error('Failed to fetch secondary screened students:', response.statusText);
+        }
+      } catch (error) {
+        console.error('Error fetching secondary screened students:', error);
+      }
+    };
+
+    const fetchData = async () => {
+      setLoading(true);
+      await Promise.all([
+        fetchClasses(),
+        fetchTotalStudents(),
+        fetchPrimaryScreenedStudents(),
+        fetchSecondaryScreenedStudents()
+      ]);
+      setLoading(false);
+    };
+
+    if (selectedSchoolpk) {
+      fetchData();
     }
-  };
+  }, [selectedSchoolpk]);
 
-  if (selectedSchoolpk && selectedClass) {
-    fetchSections();
-  }
-}, [selectedSchoolpk, selectedClass]);
+  useEffect(() => {
+    const fetchSections = async () => {
+      try {
+        const response = await fetch(`${API_URL}/getSections`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ schoolpk: selectedSchoolpk, className: selectedClass })
+        });
 
+        if (response.ok) {
+          const result = await response.json();
+          if (result.success) {
+            const transformedSections = result.data[0].Sections.map(section => ({
+              label: `Section ${section}`,
+              value: section
+            }));
+            setSections(transformedSections);
+          } else {
+            console.error('No data found or API response indicates failure.');
+          }
+        } else {
+          console.error('Failed to fetch sections:', response.statusText);
+        }
+      } catch (error) {
+        console.error('Error fetching sections:', error);
+      }
+    };
 
+    if (selectedSchoolpk && selectedClass) {
+      fetchSections();
+    }
+  }, [selectedSchoolpk, selectedClass]);
 
   const testerTypes = [
     { label: 'Primary', value: 'Primary' },
-    { label: 'Secondary', value: 'Secondary' },
-    { label: 'Tertiary', value: 'Tertiary' },
+    { label: 'Secondary', value: 'Secondary' }
   ];
 
   const handlenext = () => {
     if (selectedClass && selectedSection && selectedTesterType) {
-        if(selectedTesterType === 'Primary') {
-            router.push({
-                pathname: '/(screener)/primary/primaryScreener',
-                params: {
-                  selectedSchoolpk,
-                  selectedClass,
-                  selectedSection,
-                  selectedSchoolName
-                },
-              });
-        }
-        else if(selectedTesterType === 'Secondary') {
-            router.push({
-                pathname: '/(screener)/secondary/secondaryScreener',
-                params: {
-                  selectedSchoolpk,
-                  selectedClass,
-                  selectedSection,
-                  selectedSchoolName
-                },
-              });
-        }
-        else{
-            router.push({
-                pathname: '/(screener)/tertiary/tertiaryScreener',
-                params: {
-                  country,
-                  state,
-                  district,
-                  taluk,
-                  talukcode,
-                  selectedSchoolName,
-                  selectedSchoolpk,
-                  selectedClass,
-                  selectedSection,
-                  selectedTesterType,
-                },
-              });
-        }
-      
+      if (selectedTesterType === 'Primary') {
+        router.push({
+          pathname: '/(screener)/primary/primaryScreener',
+          params: {
+            selectedSchoolpk,
+            selectedClass,
+            selectedSection,
+            selectedSchoolName
+          },
+        });
+      } else if (selectedTesterType === 'Secondary') {
+        router.push({
+          pathname: '/(screener)/secondary/secondaryScreener',
+          params: {
+            selectedSchoolpk,
+            selectedClass,
+            selectedSection,
+            selectedSchoolName
+          },
+        });
+      }
     } else {
-      alert('Please select all fields');
+      Alert.alert('Please select all fields');
     }
+  };
+
+  if (loading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#0000ff" />
+        {/* <Text style={styles.loadingText}>Loading...</Text> */}
+      </View>
+    );
   }
 
   return (
@@ -209,28 +253,28 @@ useEffect(() => {
         }}
       />
 
-      <Text style={styles.label}>Select tester type</Text>
-    <View style={[styles.radioButtonContainer, styles.box]}>
-      {testerTypes.map((type, index) => (
-        <TouchableOpacity
-        key={index}
-        style={styles.radioButton}
-        onPress={() => setSelectedTesterType(type.value)}
-        >
-        <View
-          style={[
-            styles.radioButtonIcon,
-            {
-            borderColor: selectedTesterType === type.value ? '#007AFF' : '#ccc',
-            },
-          ]}
-        >
-          {selectedTesterType === type.value && <View style={styles.radioButtonInnerIcon} />}
-        </View>
-        <Text style={styles.radioButtonText}>{type.label}</Text>
-        </TouchableOpacity>
-      ))}
-    </View>
+      <Text style={styles.label}>Select Screener type</Text>
+      <View style={[styles.radioButtonContainer, styles.box]}>
+        {testerTypes.map((type, index) => (
+          <TouchableOpacity
+            key={index}
+            style={styles.radioButton}
+            onPress={() => setSelectedTesterType(type.value)}
+          >
+            <View
+              style={[
+                styles.radioButtonIcon,
+                {
+                  borderColor: selectedTesterType === type.value ? '#007AFF' : '#ccc',
+                },
+              ]}
+            >
+              {selectedTesterType === type.value && <View style={styles.radioButtonInnerIcon} />}
+            </View>
+            <Text style={styles.radioButtonText}>{type.label}</Text>
+          </TouchableOpacity>
+        ))}
+      </View>
 
       <TouchableOpacity style={styles.nextButton} onPress={handlenext}>
         <Text style={styles.nextButtonText}>Next</Text>
@@ -244,6 +288,17 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 20,
     backgroundColor: '#fff',
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#fff',
+  },
+  loadingText: {
+    marginTop: 10,
+    fontSize: 18,
+    color: '#000',
   },
   title: {
     fontSize: 24,
@@ -291,7 +346,6 @@ const styles = StyleSheet.create({
   },
   radioButtonContainer: {
     marginVertical: 20,
-    // padding: 10,
   },
   radioButton: {
     flexDirection: 'row',
@@ -330,13 +384,13 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontWeight: 'bold',
   },
-box: {
+  box: {
     borderWidth: 1,
     borderColor: '#ccc',
     borderRadius: 8,
     padding: 10,
     marginVertical: 10,
-},
+  },
 });
 
 export default Screener;

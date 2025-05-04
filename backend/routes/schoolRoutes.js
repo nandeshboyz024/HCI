@@ -1,6 +1,6 @@
 // routes/schoolRoutes.js
 import express from 'express';
-import { getSchools,getSchool,addSchool,updateSchool, getClasses, getSections , getStudentsForPrimaryScreening, primaryScreeningSubmitForm, secondaryScreeningSubmitForm, getStudentsForSecondaryScreening} from '../controllers/schoolControllers.js';
+import { getSchools,getSchool,addSchool,updateSchool, getClasses, getSections , getStudentsForPrimaryScreening, primaryScreeningSubmitForm, secondaryScreeningSubmitForm, getStudentsForSecondaryScreening, primaryTestedCountStudentsBySchool, getTotalStudentsBySchool, getSecondaryTestedCountStudentsBySchool} from '../controllers/schoolControllers.js';
 
 const router = express.Router();
 
@@ -17,5 +17,13 @@ router.post('/getStudentsForPrimaryScreening', getStudentsForPrimaryScreening);
 router.post('/primaryScreeningSubmitForm' ,primaryScreeningSubmitForm);
 router.post('/secondaryScreeningSubmitForm' , secondaryScreeningSubmitForm);
 router.post('/getStudentsForSecondaryScreening', getStudentsForSecondaryScreening);
+
+router.post('/getPrimaryTestedCountStudentsBySchool', primaryTestedCountStudentsBySchool);
+router.post('/getTotalStudentsBySchool' , getTotalStudentsBySchool);
+router.post('/getSecondaryTestedCountStudentsBySchool', getSecondaryTestedCountStudentsBySchool);
+// router.post('/getRemainingCountStudentsBySchool', remainingCountStudentsBySchool);
+
+
+
 
 export default router;

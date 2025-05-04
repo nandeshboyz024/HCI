@@ -1,14 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, FlatList, TextInput } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, FlatList, TextInput, ActivityIndicator } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons'; // Import the icon library
 import { API_URL } from '@env';
-import { useCallback } from 'react';
-
-
-
-
-
 
 const PrimaryScreening = () => {
   const { selectedSchoolpk, selectedClass, selectedSection, selectedSchoolName } = useLocalSearchParams();
@@ -16,96 +10,71 @@ const PrimaryScreening = () => {
   const [students, setStudents] = useState([]);
   const [filteredStudents, setFilteredStudents] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
-
   const [nOfRemainingStudents, setnOfRemainingStudents] = useState(27);
   const [nOfTestedStudents, setnOfTestedStudents] = useState(23);
   const [activeTab, setActiveTab] = useState('remaining'); // 'remaining' or 'tested'
+  const [remainingStudents, setRemainingStudents] = useState([]);
+  const [testedStudents, setTestedStudents] = useState([]);
+  const [loading, setLoading] = useState(true); // Add loading state
 
-  const [remainingStudents, setRemainingStudents] = React.useState([]);
-  const [testedStudents, setTestedStudents] = React.useState([]);
+  useEffect(() => {
+    const fetchStudents = async () => {
+      setLoading(true); // Set loading to true before fetching data
+      try {
+        const response = await fetch(`${API_URL}/getStudentsForPrimaryScreening`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ schoolpk: selectedSchoolpk, className: selectedClass, section: selectedSection })
+        });
 
-  let reloadKey = 0;
+        if (response.ok) {
+          const result = await response.json();
+          if (result.success) {
+            // Separate students based on status
+            const remaining = result.data.filter(student => student.status === 0);
+            const tested = result.data.filter(student => student.status === 1);
 
-  // const reloadPage = useCallback(() => {
-  //   setReloadKey((prevKey) => prevKey + 1);
-  // }, []);
+            // Transform the data into the desired format
+            const transformedRemainingStudents = remaining.map(student => ({
+              satsId: student.StudentId,
+              Name: student.StudentName,
+              Parent: student.ParentName,
+              Age: student.Age,
+              Sex: student.Sex
+            }));
 
+            const transformedTestedStudents = tested.map(student => ({
+              satsId: student.StudentId,
+              Name: student.StudentName,
+              Parent: student.ParentName,
+              Age: student.Age,
+              Sex: student.Sex,
+              status: student.testResultStatus,
+              reVision: student.reVision,
+              leVision: student.leVision
+            }));
 
-
-
-useEffect(() => {
-  const fetchStudents = async () => {
-    try {
-      const response = await fetch(`${API_URL}/getStudentsForPrimaryScreening`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ schoolpk: selectedSchoolpk, className: selectedClass, section: selectedSection })
-      });
-
-
-      if (response.ok) {
-        const result = await response.json();
-        if (result.success) {
-          // Separate students based on status
-          const remaining = result.data.filter(student => student.status === 0);
-          const tested = result.data.filter(student => student.status === 1);
-
-          // Transform the data into the desired format
-          const transformedRemainingStudents = remaining.map(student => ({
-            satsId: student.StudentId,
-            Name: student.StudentName,
-            Parent: student.ParentName,
-            Age: student.Age,
-            Sex: student.Sex
-          }));
-
-          const transformedTestedStudents = tested.map(student => ({
-            satsId: student.StudentId,
-            Name: student.StudentName,
-            Parent: student.ParentName,
-            Age: student.Age,
-            Sex: student.Sex,
-            status: student.testResultStatus,
-            reVision: student.reVision,
-            leVision: student.leVision
-          }));
-
-          setRemainingStudents(transformedRemainingStudents);
-          setTestedStudents(transformedTestedStudents);
-          setnOfRemainingStudents(transformedRemainingStudents.length);
-          setnOfTestedStudents(transformedTestedStudents.length);
-
+            setRemainingStudents(transformedRemainingStudents);
+            setTestedStudents(transformedTestedStudents);
+            setnOfRemainingStudents(transformedRemainingStudents.length);
+            setnOfTestedStudents(transformedTestedStudents.length);
+          } else {
+            console.error('No data found or API response indicates failure.');
+          }
         } else {
-          console.error('No data found or API response indicates failure.');
+          console.error('Failed to fetch students:', response.statusText);
         }
-      } else {
-        console.error('Failed to fetch students:', response.statusText);
+      } catch (error) {
+        console.error('Error fetching students:', error);
+      } finally {
+        setLoading(false); // Set loading to false after data is fetched
       }
-    } catch (error) {
-      console.error('Error fetching students:', error);
+    };
+
+    if (selectedSchoolpk && selectedClass && selectedSection) {
+      fetchStudents();
     }
-  };
-
-  if (selectedSchoolpk && selectedClass && selectedSection) {
-    fetchStudents();
-  }
-}, [selectedSchoolpk, selectedClass, selectedSection , activeTab]);
-
-
-  // Dummy data for remaining students
-  // const dummyRemainingStudents = [
-  //   { id: '1', name: 'Rahul Choudhary', parent: 'Vikram Choudhary', age: 15, sex: 'M' },
-  //   { id: '2', name: 'Mohit Malhotra', parent: 'Ram Malhotra', age: 15, sex: 'M' },
-  //   { id: '3', name: 'Rohit Malhotra', parent: 'Jagdish Malhotra', age: 15, sex: 'M' },
-  // ];
-
-  // // Dummy data for tested students
-  // const dummyTestedStudents = [
-  //   { id: '4', name: 'Neha Sharma', parent: 'Devdatt Sharma', age: 15, sex: 'F', status: 'Secondary Evaluation Required', reVision: '4/7', leVision: '6/7' },
-  //   { id: '5', name: 'Amit Kumar', parent: 'Rakesh Kumar', age: 15, sex: 'M', status: 'Normal' },
-  //   { id: '6', name: 'Priya Singh', parent: 'Rajesh Singh', age: 15, sex: 'F', status: 'Normal', reVision: '5/6', leVision: '6/6' },
-  //   { id: '7', name: 'Riya Singh', parent: 'Rajesh Singh', age: 15, sex: 'F', status: 'Normal', reVision: '5/6', leVision: '6/6' },
-  // ];
+  }, [selectedSchoolpk, selectedClass, selectedSection, activeTab]);
 
   useEffect(() => {
     if (activeTab === 'remaining') {
@@ -128,7 +97,6 @@ useEffect(() => {
       );
     }
   }, [searchQuery, students]);
-
 
   const handleTabPress = (tab) => {
     setActiveTab(tab);
@@ -161,23 +129,38 @@ useEffect(() => {
   const renderStudentItem = ({ item }) => (
     <TouchableOpacity style={styles.studentItem} onPress={() => handleStudentPress(item)}>
       <View style={styles.studentIcon}>
-        <Text style={styles.studentIconText}>{item.Name.charAt(0).toUpperCase()}</Text>
+        <Ionicons name="person-circle-outline" size={40} color="#000" />
       </View>
       <View style={styles.studentDetails}>
         <Text style={styles.studentName}>Name: {item.Name}</Text>
-        <Text style={styles.studentParent}>Parent: {item.Parent}</Text>
-        <Text style={styles.studentAge}>Age: {item.Age}</Text>
-        <Text style={styles.studentSex}>Sex: {item.Sex}</Text>
+        <Text style={styles.studentParent}>Parent Name: {item.Parent}</Text>
+        <View style={{ flexDirection: 'row', justifyContent: 'flex-start', paddingVertical: 5 }}>
+          <Text style={[styles.studentAge, { marginRight: 50 }]}>Age: {item.Age}</Text>
+          <Text style={styles.studentSex}>Sex: {item.Sex}</Text>
+        </View>
         {activeTab === 'tested' && (
-          <>
+            <>
             <Text style={styles.studentStatus}>Status: {item.status}</Text>
+
+            <View style={{ flexDirection: 'row', marginTop: 5 }}>
+            
             {item.reVision && <Text style={styles.studentVision}>RE Vision: {item.reVision}</Text>}
             {item.leVision && <Text style={styles.studentVision}>LE Vision: {item.leVision}</Text>}
-          </>
+            </View>
+            </>
         )}
       </View>
     </TouchableOpacity>
   );
+
+  if (loading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#0000ff" />
+        {/* <Text style={styles.loadingText}>Loading...</Text> */}
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>
@@ -185,7 +168,7 @@ useEffect(() => {
       <Text style={styles.subtitle}>Class {selectedClass}</Text>
       <Text style={styles.subtitle}>Section {selectedSection}</Text>
       <Text style={styles.info}>
-        <Text style={{ color: '#0497F3' }}>{nOfRemainingStudents}</Text> / {nOfRemainingStudents + nOfTestedStudents}
+        <Text style={{ color: '#0497F3' }}>{nOfTestedStudents}</Text> / {nOfRemainingStudents+nOfTestedStudents}
       </Text>
 
       <View style={styles.buttonContainer}>
@@ -224,6 +207,17 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 20,
     backgroundColor: '#fff',
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#fff',
+  },
+  loadingText: {
+    marginTop: 10,
+    fontSize: 18,
+    color: '#000',
   },
   title: {
     fontSize: 24,
@@ -297,16 +291,9 @@ const styles = StyleSheet.create({
   studentIcon: {
     width: 40,
     height: 40,
-    borderRadius: 20,
-    backgroundColor: '#007AFF',
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: 10,
-  },
-  studentIconText: {
-    color: '#fff',
-    fontSize: 18,
-    fontWeight: 'bold',
   },
   studentDetails: {
     flex: 1,
@@ -334,7 +321,10 @@ const styles = StyleSheet.create({
   studentVision: {
     fontSize: 14,
     color: '#555',
+    marginRight: 50
   },
 });
 
 export default PrimaryScreening;
+
+

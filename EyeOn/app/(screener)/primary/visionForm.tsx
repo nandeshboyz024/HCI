@@ -1,14 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, TextInput, Alert } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, TextInput, Alert, ActivityIndicator } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-
 import { API_URL } from '@env';
 
 const VisionScreen = () => {
-  const { satsId, studentName, studentParent, studentREVision, studentLEVision , selectedSchoolpk, selectedClass, selectedSection, selectedSchoolName } = useLocalSearchParams();
+  const { satsId, studentName, studentParent, studentREVision, studentLEVision, selectedSchoolpk, selectedClass, selectedSection, selectedSchoolName } = useLocalSearchParams();
   const router = useRouter();
 
   const [reVisionLeft, setReVisionLeft] = useState('6');
@@ -17,6 +15,7 @@ const VisionScreen = () => {
   const [leVisionRight, setLeVisionRight] = useState('6');
   const [reVision, setReVision] = useState('6/6');
   const [leVision, setLeVision] = useState('6/6');
+  const [loading, setLoading] = useState(false); // Add loading state
 
   const showNotification = (message) => {
     toast.success(message, {
@@ -29,7 +28,6 @@ const VisionScreen = () => {
       progress: undefined,
     });
   };
-
 
   useEffect(() => {
     if (studentREVision) {
@@ -44,21 +42,16 @@ const VisionScreen = () => {
     }
   }, [studentREVision, studentLEVision]);
 
-
   const handleSubmit = async () => {
-     // Navigate back to the previous screen
-  
-    // Handle the submit action here
-    // setReVision(`${reVisionLeft}/${reVisionRight}`);
-    // setLeVision(`${leVisionLeft}/${leVisionRight}`);
-  
+    setLoading(true); // Set loading to true before form submission
+
     try {
       const response = await fetch(`${API_URL}/primaryScreeningSubmitForm`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ satsId, reVision : `${reVisionLeft}/${reVisionRight}`, leVision : `${leVisionLeft}/${leVisionRight}`  })
+        body: JSON.stringify({ satsId, reVision: `${reVisionLeft}/${reVisionRight}`, leVision: `${leVisionLeft}/${leVisionRight}` })
       });
-  
+
       if (response.ok) {
         const result = await response.json();
         if (result.success) {
@@ -74,26 +67,27 @@ const VisionScreen = () => {
       }
     } catch (error) {
       console.error('Error submitting form:', error);
+    } finally {
+      setLoading(false); // Set loading to false after form submission
     }
-    Alert.alert('Success', 'Primary Vision form submitted successfully.');
 
-    router.push({
-                    pathname: '/(screener)/primary/primaryScreener',
-                    params: {
-                      selectedSchoolpk,
-                      selectedClass,
-                      selectedSection,
-                      selectedSchoolName
-                    },
-                  });
+    Alert.alert('Primary Vision form submitted successfully.');
 
-  };  
+    router.replace({
+      pathname: '/(screener)/primary/primaryScreener',
+      params: {
+        selectedSchoolpk,
+        selectedClass,
+        selectedSection,
+        selectedSchoolName
+      },
+    });
+  };
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Primary Screening</Text>
-      <Text style={styles.label}>Name: {studentName}</Text>
-      <Text style={styles.label}>Parent: {studentParent}</Text>
+      <Text style={styles.label}>Student Name: {studentName}</Text>
+      <Text style={styles.parentlabel}>Parent Name: {studentParent}</Text>
 
       <Text style={styles.sectionTitle}>RE Vision</Text>
       <View style={styles.visionInputContainer}>
@@ -129,10 +123,13 @@ const VisionScreen = () => {
         />
       </View>
 
-      <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
-        <Text style={styles.submitButtonText}>Submit</Text>
-      </TouchableOpacity>
-      
+      {loading ? (
+        <ActivityIndicator size="large" color="#0000ff" style={styles.loadingIndicator} />
+      ) : (
+        <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
+          <Text style={styles.submitButtonText}>Submit</Text>
+        </TouchableOpacity>
+      )}
     </View>
   );
 };
@@ -150,7 +147,12 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   label: {
-    fontSize: 16,
+    fontSize: 20,
+    marginBottom: 10,
+    textAlign: 'center',
+  },
+  parentlabel: {
+    fontSize: 15,
     marginBottom: 10,
     textAlign: 'center',
   },
@@ -159,6 +161,7 @@ const styles = StyleSheet.create({
     marginTop: 20,
     marginBottom: 10,
     textAlign: 'center',
+    // marginLeft: 50,
   },
   visionInputContainer: {
     flexDirection: 'row',
@@ -194,6 +197,9 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontWeight: 'bold',
   },
+    loadingIndicator: {
+      marginTop: 20,
+    },
 });
 
 export default VisionScreen;

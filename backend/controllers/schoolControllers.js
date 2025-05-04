@@ -370,6 +370,15 @@ export const secondaryScreeningSubmitForm = async (req, res) => {
           "satsId" = ${satsId};
     `;
 
+    await sql`
+        UPDATE "primaryScreeningData"
+        SET 
+              "testResultStatus" = 'Secondary Evaluation Required',
+              "reVision" = ${rightEyeVision},
+              "leVision" = ${leftEyeVision}
+        WHERE "satsId" = ${satsId};
+      `;
+
     const result = await sql`
       SELECT * FROM "Students" WHERE "StudentId" = ${satsId};
     `;
@@ -439,4 +448,99 @@ WHERE
     });
   }
 };
+
+
+export const primaryTestedCountStudentsBySchool = async (req, res) => {
+  try {
+    const { schoolpk } = req.body;
+
+    if (!schoolpk) {
+      return res.status(400).json({
+        success: false,
+        message: "Schoolpk is required"
+      });
+    }
+ 
+    const result = await sql`
+      SELECT COUNT(*) AS studentCount
+      FROM "Students" s
+      JOIN "primaryScreeningData" psd ON s."StudentId" = psd."satsId"
+      WHERE s."Schoolpk" = ${schoolpk} AND psd."status" = 1;
+    `;
+
+    res.json({
+      success: true,
+      data: result[0].studentcount
+    });
+  } catch (err) {
+    console.error("Error in counting students by school: ", err);
+    res.status(500).json({
+      success: false,
+      message: "Internal Server Error"
+    });
+  }
+};
+
+export const getTotalStudentsBySchool = async (req, res) => {
+  try {
+    const { schoolpk } = req.body;
+
+    if (!schoolpk) {
+      return res.status(400).json({
+        success: false,
+        message: "Schoolpk is required"
+      });
+    }
+
+    const result = await sql`
+      SELECT COUNT(*) AS TotalStudents
+      FROM "Students"
+      WHERE "Schoolpk" = ${schoolpk};
+    `;
+
+    res.json({
+      success: true,
+      data: result[0].totalstudents
+    });
+  } catch (err) {
+    console.error("Error in counting students by school: ", err);
+    res.status(500).json({
+      success: false,
+      message: "Internal Server Error"
+    });
+  }
+};
+
+export const getSecondaryTestedCountStudentsBySchool = async (req, res) => {
+  try {
+    const { schoolpk } = req.body;
+
+    if (!schoolpk) {
+      return res.status(400).json({
+        success: false,
+        message: "Schoolpk is required"
+      });
+    }
+
+    const result = await sql`
+      SELECT COUNT(*) AS studentCount
+      FROM "Students" s
+      JOIN "secondaryScreeningData" ssd ON s."StudentId" = ssd."satsId"
+      WHERE s."Schoolpk" = ${schoolpk} AND ssd."status" = 1;
+    `;
+
+    res.json({
+      success: true,
+      data: result[0].studentcount
+    });
+  } catch (err) {
+    console.error("Error in counting students by school: ", err);
+    res.status(500).json({
+      success: false,
+      message: "Internal Server Error"
+    });
+  }
+};
+
+
 
