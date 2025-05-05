@@ -27,6 +27,7 @@ export const getStates = async (req, res) => {
       SELECT DISTINCT "State"
       FROM "Postalcodes"
       WHERE "Country" = ${Country}
+      ORDER BY "State"
     `;
     const states = result.map(row => row.State).filter(Boolean);
     
@@ -51,6 +52,7 @@ export const getDistricts = async (req, res) => {
       SELECT DISTINCT "District"
       FROM "Postalcodes"
       WHERE "Country" = ${Country} AND "State" = ${State}
+      ORDER BY "District"
     `;
     const districts = result.map(row => row.District).filter(Boolean);
     res.json({
@@ -76,6 +78,7 @@ export const getTaluks = async (req, res) => {
       WHERE "Country" = ${Country}
         AND "State" = ${State}
         AND "District" = ${District}
+      ORDER BY "Taluk"
     `;
     const taluks = result.map(row => [row.Taluk,row.pk,row.Postalcode]).filter(Boolean);
 

@@ -4,7 +4,11 @@ import sql from '../db.js';
 export const getSchools = async (req, res) => {
   try {
     const {postalcodepk} = req.body;
-    const result = await sql`SELECT "pk","SchoolName" FROM "Schools" WHERE "Postalcodepk"=${postalcodepk};`;
+    const result = await sql` SELECT "pk","SchoolName"
+                              FROM "Schools"
+                              WHERE "Postalcodepk"=${postalcodepk}
+                              ORDER BY "SchoolName"
+                              `;
     const schools = result.map(row => [row.pk,row.SchoolName]).filter(Boolean);
     res.json({
       success: true,
