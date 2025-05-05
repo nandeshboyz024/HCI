@@ -52,8 +52,10 @@ export const uploadStudents = async (req, res) => {
     const initialCount = parseInt(initialCountResult[0].count);
     // Process each record
     for (const row of records) {
-      const { StudentId, StudentName, ParentName, Age, Sex, Class: classId, Section} = row;
-      
+      let { StudentId, StudentName, ParentName, Age, Sex, Class: classId, Section} = row;
+      StudentId = StudentId?.trim();
+      Section = Section?.trim();
+      if(Section===null || Section==="") Section="Others";
       if(!StudentId) continue;
       if(!StudentName) continue;
       if(!ParentName) continue;
@@ -89,6 +91,13 @@ export const uploadStudents = async (req, res) => {
               ELSE "SchoolClasses"."Sections"
             END
           );
+      `;
+
+      await sql`
+        INSERT INTO "primaryScreeningData"
+        ("satsId", "reVision", "leVision", "status", "testResultStatus")
+        VALUES (${StudentId}, '6/6', '6/6', 0, NULL)
+        ON CONFLICT ("satsId") DO NOTHING;
       `;
     }
     const finalCountResult = await sql`SELECT COUNT(*) FROM "Students" WHERE "Schoolpk"=${schoolpk}`;

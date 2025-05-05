@@ -172,7 +172,6 @@ export const getSections = async (req, res) => {
 export const getStudentsForPrimaryScreening = async (req, res) => {
   try {
     const {schoolpk, className, section} = req.body;
-
     const result = await sql`SELECT
     s."StudentId",
     s."StudentName",
@@ -193,6 +192,7 @@ WHERE
     s."Schoolpk" = ${schoolpk}
     AND s."Class" = ${className}
     AND s."Section" = ${section};`;
+
     res.json({
       success: true,
       data: result,
