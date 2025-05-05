@@ -76,6 +76,7 @@ export const uploadStudents = async (req, res) => {
           "Section" = EXCLUDED."Section",
           "Schoolpk" = EXCLUDED."Schoolpk";
       `;
+
       // 2. UPSERT into "SchoolClasses" and append section if not exists
       await sql`
         INSERT INTO "SchoolClasses" ("Schoolpk", "Class", "Sections")
@@ -89,6 +90,13 @@ export const uploadStudents = async (req, res) => {
               ELSE "SchoolClasses"."Sections"
             END
           );
+      `;
+      // 3. Insert into "primaryScreeningData"
+      await sql`
+        INSERT INTO "primaryScreeningData"
+        ("satsId", "reVision", "leVision", "status", "testResultStatus")
+        VALUES (${StudentId}, '6/6', '6/6', 0, NULL)
+        ON CONFLICT ("satsId") DO NOTHING;
       `;
     }
     const finalCountResult = await sql`SELECT COUNT(*) FROM "Students" WHERE "Schoolpk"=${schoolpk}`;

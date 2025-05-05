@@ -9,10 +9,10 @@ const Footer = () => {
 
   return (
     <View style={styles.footer}>
-      <TouchableOpacity onPress={() => router.push('/FilterSchools')}>
+      <TouchableOpacity style={styles.iconContainer} onPress={() => router.push('/FilterSchools')}>
         <Icon name="home" size={30} style={styles.icon} />
       </TouchableOpacity>
-      <TouchableOpacity onPress={() => router.push('/')}>
+      <TouchableOpacity style={styles.iconContainer} onPress={() => router.push('/')}>
         <Icon name="sign-out" size={30} style={styles.icon} />
       </TouchableOpacity>
     </View>
@@ -22,12 +22,15 @@ const Footer = () => {
 const styles = StyleSheet.create({
   footer: {
     flexDirection: 'row',
-    justifyContent: 'space-around',
+    justifyContent: 'center', // Center the icons
     alignItems: 'center',
     height: 60,
     backgroundColor: '#fff',
     borderTopWidth: 1,
     borderTopColor: '#ccc',
+  },
+  iconContainer: { 
+    marginHorizontal: 100,
   },
   icon: {
     color: '#000',
