@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, ActivityIndicator, Alert } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, ActivityIndicator, Alert, KeyboardAvoidingView, Platform } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { Dropdown } from 'react-native-element-dropdown';
+import Footer from './footer'; // Import the Footer component
 import { API_URL } from '@env';
 
 const SchoolList = () => {
@@ -76,21 +77,23 @@ const SchoolList = () => {
     return (
       <View style={styles.loadingContainer}>
         <ActivityIndicator size="large" color="#0000ff" />
-        {/* <Text style={styles.loadingText}>Loading...</Text> */}
       </View>
     );
   }
 
   return (
-    <>
-      <View style={{ alignItems: 'center', justifyContent: 'center' }}>
-        <Text style={styles.label}>Country: {country}</Text>
-        <Text style={styles.label}>State: {state}</Text>
-        <Text style={styles.label}>District: {district}</Text>
-        <Text style={styles.label}>Taluk: {taluk}</Text>
-      </View>
+    <KeyboardAvoidingView
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      style={styles.container}
+    >
+      <View style={styles.content}>
+        <View style={{ alignItems: 'center', justifyContent: 'center' }}>
+          <Text style={styles.label}>Country: {country}</Text>
+          <Text style={styles.label}>State: {state}</Text>
+          <Text style={styles.label}>District: {district}</Text>
+          <Text style={styles.label}>Taluk: {taluk}</Text>
+        </View>
 
-      <View style={styles.container}>
         <Dropdown
           style={styles.dropdown}
           placeholderStyle={styles.placeholderStyle}
@@ -112,15 +115,19 @@ const SchoolList = () => {
           <Text style={styles.buttonText}>Go to School</Text>
         </TouchableOpacity>
       </View>
-    </>
+      <Footer />
+    </KeyboardAvoidingView>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 20,
     backgroundColor: '#fff',
+  },
+  content: {
+    flex: 1,
+    padding: 20,
   },
   loadingContainer: {
     flex: 1,

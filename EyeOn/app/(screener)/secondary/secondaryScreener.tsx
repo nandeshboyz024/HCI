@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, FlatList, TextInput, ActivityIndicator } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, FlatList, TextInput, ActivityIndicator, KeyboardAvoidingView, Platform } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons'; // Import the icon library
+import Footer from '../footer'; // Import the Footer component
 import { API_URL } from '@env'; // Ensure you have the correct path to your .env file
 
 const SecondaryScreening = () => {
@@ -113,7 +114,7 @@ const SecondaryScreening = () => {
   const renderStudentItem = ({ item }) => (
     <TouchableOpacity style={styles.studentItem} onPress={() => handleStudentPress(item)}>
       <View style={styles.studentIcon}>
-              <Ionicons name="person-circle-outline" size={40} color="#000" />
+        <Ionicons name="person-circle-outline" size={40} color="#000" />
       </View>
       <View style={styles.studentDetails}>
         <Text style={styles.studentName}>Name: {item.StudentName}</Text>
@@ -126,9 +127,9 @@ const SecondaryScreening = () => {
           <>
             <Text style={styles.studentStatus}>Status: {item.primaryTestResultStatus}</Text>
             <View style={{ flexDirection: 'row', marginTop: 5 }}>
-            {item.rightEyeVision && <Text style={styles.studentVision}>RE Vision: {item.rightEyeVision}</Text>}
-            {item.leftEyeVision && <Text style={styles.studentVision}>LE Vision: {item.leftEyeVision}</Text>}
-            </View>   
+              {item.rightEyeVision && <Text style={styles.studentVision}>RE Vision: {item.rightEyeVision}</Text>}
+              {item.leftEyeVision && <Text style={styles.studentVision}>LE Vision: {item.leftEyeVision}</Text>}
+            </View>
           </>
         )}
 
@@ -160,56 +161,64 @@ const SecondaryScreening = () => {
     return (
       <View style={styles.loadingContainer}>
         <ActivityIndicator size="large" color="#0000ff" />
-        {/* <Text style={styles.loadingText}>Loading...</Text> */}
       </View>
     );
   }
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>{selectedSchoolName}</Text>
-      <Text style={styles.subtitle}>Class {selectedClass}</Text>
-      <Text style={styles.subtitle}>Section {selectedSection}</Text>
-      <Text style={styles.info}>
-        <Text style={{ color: '#0497F3' }}>{testedStudents.length}</Text> / {remainingStudents.length + testedStudents.length}
-      </Text>
+    <KeyboardAvoidingView
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      style={styles.container}
+    >
+      <View style={styles.content}>
+        <Text style={styles.title}>{selectedSchoolName}</Text>
+        <Text style={styles.subtitle}>Class {selectedClass}</Text>
+        <Text style={styles.subtitle}>Section {selectedSection}</Text>
+        <Text style={styles.info}>
+          <Text style={{ color: '#0497F3' }}>{testedStudents.length}</Text> / {remainingStudents.length + testedStudents.length}
+        </Text>
 
-      <View style={styles.buttonContainer}>
-        <TouchableOpacity style={[styles.button, activeTab === 'remaining' && styles.activeButton]} onPress={() => handleTabPress('remaining')}>
-          <Text style={[styles.buttonText, activeTab === 'remaining' && styles.activeButtonText]}>Remaining</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={[styles.button, activeTab === 'tested' && styles.activeButton]} onPress={() => handleTabPress('tested')}>
-          <Text style={[styles.buttonText, activeTab === 'tested' && styles.activeButtonText]}>Tested</Text>
-        </TouchableOpacity>
-      </View>
-
-      <View style={styles.searchContainer}>
-        <View style={styles.searchBar}>
-          <Ionicons name="search" size={20} color="#888" style={styles.searchIcon} />
-          <TextInput
-            style={styles.searchInput}
-            placeholder="Search Student"
-            value={searchQuery}
-            onChangeText={setSearchQuery}
-          />
+        <View style={styles.buttonContainer}>
+          <TouchableOpacity style={[styles.button, activeTab === 'remaining' && styles.activeButton]} onPress={() => handleTabPress('remaining')}>
+            <Text style={[styles.buttonText, activeTab === 'remaining' && styles.activeButtonText]}>Remaining</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={[styles.button, activeTab === 'tested' && styles.activeButton]} onPress={() => handleTabPress('tested')}>
+            <Text style={[styles.buttonText, activeTab === 'tested' && styles.activeButtonText]}>Tested</Text>
+          </TouchableOpacity>
         </View>
-      </View>
 
-      <FlatList
-        data={filteredStudents}
-        renderItem={renderStudentItem}
-        keyExtractor={(item) => item.StudentId.toString()}
-        style={styles.studentList}
-      />
-    </View>
+        <View style={styles.searchContainer}>
+          <View style={styles.searchBar}>
+            <Ionicons name="search" size={20} color="#888" style={styles.searchIcon} />
+            <TextInput
+              style={styles.searchInput}
+              placeholder="Search Student"
+              value={searchQuery}
+              onChangeText={setSearchQuery}
+            />
+          </View>
+        </View>
+
+        <FlatList
+          data={filteredStudents}
+          renderItem={renderStudentItem}
+          keyExtractor={(item) => item.StudentId.toString()}
+          style={styles.studentList}
+        />
+      </View>
+      <Footer />
+    </KeyboardAvoidingView>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 20,
     backgroundColor: '#fff',
+  },
+  content: {
+    flex: 1,
+    padding: 20,
   },
   loadingContainer: {
     flex: 1,
@@ -297,11 +306,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: 10,
-  },
-  studentIconText: {
-    color: '#fff',
-    fontSize: 18,
-    fontWeight: 'bold',
   },
   studentDetails: {
     flex: 1,

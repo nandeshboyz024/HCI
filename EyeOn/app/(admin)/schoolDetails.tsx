@@ -286,7 +286,7 @@ export default function SchoolDetails() {
                  </View>
                </Pressable>
              </Modal>
-    </View>
+            </View>
   );
 }
 

@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, ActivityIndicator, Alert } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, ActivityIndicator, Alert, KeyboardAvoidingView, Platform } from 'react-native';
 import { Dropdown } from 'react-native-element-dropdown';
 import { useLocalSearchParams } from 'expo-router';
 import { router } from 'expo-router';
+import Footer from './footer'; // Import the Footer component
 import { API_URL } from '@env';
 
 const Screener = () => {
@@ -203,91 +204,99 @@ const Screener = () => {
     return (
       <View style={styles.loadingContainer}>
         <ActivityIndicator size="large" color="#0000ff" />
-        {/* <Text style={styles.loadingText}>Loading...</Text> */}
       </View>
     );
   }
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>{selectedSchoolName}</Text>
-      <Text style={styles.info}>Total Students: {totalStudent}</Text>
-      <Text style={styles.info}>Primary Screened Students: {primaryScreenedStudents}</Text>
-      <Text style={styles.info}>Secondary Screened Students: {secondaryScreenedStudents}</Text>
+    <KeyboardAvoidingView
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      style={styles.container}
+    >
+      <View style={styles.content}>
+        <Text style={styles.title}>{selectedSchoolName}</Text>
+        <Text style={styles.info}>Total Students: {totalStudent}</Text>
+        <Text style={styles.info}>Primary Screened Students: {primaryScreenedStudents}</Text>
+        <Text style={styles.info}>Secondary Screened Students: {secondaryScreenedStudents}</Text>
 
-      <Dropdown
-        style={styles.dropdown}
-        placeholderStyle={styles.placeholderStyle}
-        selectedTextStyle={styles.selectedTextStyle}
-        inputSearchStyle={styles.inputSearchStyle}
-        iconStyle={styles.iconStyle}
-        data={classes}
-        search
-        maxHeight={300}
-        labelField="label"
-        valueField="value"
-        placeholder="Select Class"
-        searchPlaceholder="Search..."
-        value={selectedClass}
-        onChange={item => {
-          setSelectedClass(item.value);
-        }}
-      />
+        <Dropdown
+          style={styles.dropdown}
+          placeholderStyle={styles.placeholderStyle}
+          selectedTextStyle={styles.selectedTextStyle}
+          inputSearchStyle={styles.inputSearchStyle}
+          iconStyle={styles.iconStyle}
+          data={classes}
+          search
+          maxHeight={300}
+          labelField="label"
+          valueField="value"
+          placeholder="Select Class"
+          searchPlaceholder="Search..."
+          value={selectedClass}
+          onChange={item => {
+            setSelectedClass(item.value);
+          }}
+        />
 
-      <Dropdown
-        style={styles.dropdown}
-        placeholderStyle={styles.placeholderStyle}
-        selectedTextStyle={styles.selectedTextStyle}
-        inputSearchStyle={styles.inputSearchStyle}
-        iconStyle={styles.iconStyle}
-        data={sections}
-        search
-        maxHeight={300}
-        labelField="label"
-        valueField="value"
-        placeholder="Select Section"
-        searchPlaceholder="Search..."
-        value={selectedSection}
-        onChange={item => {
-          setSelectedSection(item.value);
-        }}
-      />
+        <Dropdown
+          style={styles.dropdown}
+          placeholderStyle={styles.placeholderStyle}
+          selectedTextStyle={styles.selectedTextStyle}
+          inputSearchStyle={styles.inputSearchStyle}
+          iconStyle={styles.iconStyle}
+          data={sections}
+          search
+          maxHeight={300}
+          labelField="label"
+          valueField="value"
+          placeholder="Select Section"
+          searchPlaceholder="Search..."
+          value={selectedSection}
+          onChange={item => {
+            setSelectedSection(item.value);
+          }}
+        />
 
-      <Text style={styles.label}>Select Screener type</Text>
-      <View style={[styles.radioButtonContainer, styles.box]}>
-        {testerTypes.map((type, index) => (
-          <TouchableOpacity
-            key={index}
-            style={styles.radioButton}
-            onPress={() => setSelectedTesterType(type.value)}
-          >
-            <View
-              style={[
-                styles.radioButtonIcon,
-                {
-                  borderColor: selectedTesterType === type.value ? '#007AFF' : '#ccc',
-                },
-              ]}
+        <Text style={styles.label}>Select Screener type</Text>
+        <View style={[styles.radioButtonContainer, styles.box]}>
+          {testerTypes.map((type, index) => (
+            <TouchableOpacity
+              key={index}
+              style={styles.radioButton}
+              onPress={() => setSelectedTesterType(type.value)}
             >
-              {selectedTesterType === type.value && <View style={styles.radioButtonInnerIcon} />}
-            </View>
-            <Text style={styles.radioButtonText}>{type.label}</Text>
-          </TouchableOpacity>
-        ))}
-      </View>
+              <View
+                style={[
+                  styles.radioButtonIcon,
+                  {
+                    borderColor: selectedTesterType === type.value ? '#007AFF' : '#ccc',
+                  },
+                ]}
+              >
+                {selectedTesterType === type.value && <View style={styles.radioButtonInnerIcon} />}
+              </View>
+              <Text style={styles.radioButtonText}>{type.label}</Text>
+            </TouchableOpacity>
+          ))}
+        </View>
 
-      <TouchableOpacity style={styles.nextButton} onPress={handlenext}>
-        <Text style={styles.nextButtonText}>Next</Text>
-      </TouchableOpacity>
-    </View>
+        <TouchableOpacity style={styles.nextButton} onPress={handlenext}>
+          <Text style={styles.nextButtonText}>Next</Text>
+        </TouchableOpacity>
+      </View>
+      <Footer />
+    </KeyboardAvoidingView>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 20,
     backgroundColor: '#fff',
+  },
+  content: {
+    flex: 1,
+    padding: 20,
   },
   loadingContainer: {
     flex: 1,
@@ -371,7 +380,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   nextButton: {
-    backgroundColor: '#8F73E2',
+    backgroundColor: '#007AFF',
     paddingVertical: 15,
     borderRadius: 8,
     alignItems: 'center',
