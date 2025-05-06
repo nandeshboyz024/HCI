@@ -8,6 +8,8 @@ import { API_URL } from '@env';
 const PrimaryScreening = () => {
   const { selectedSchoolpk, selectedClass, selectedSection, selectedSchoolName } = useLocalSearchParams();
   const router = useRouter();
+  // const testing = useState("");
+  
   const [students, setStudents] = useState([]);
   const [filteredStudents, setFilteredStudents] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
@@ -27,6 +29,8 @@ const PrimaryScreening = () => {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ schoolpk: selectedSchoolpk, className: selectedClass, section: selectedSection })
         });
+        console.log("response", response);
+        
 
         if (response.ok) {
           const result = await response.json();
@@ -69,11 +73,13 @@ const PrimaryScreening = () => {
         console.error('Error fetching students:', error);
       } finally {
         setLoading(false); // Set loading to false after data is fetched
+        // setActiveTab('tested');
       }
     };
 
     if (selectedSchoolpk && selectedClass && selectedSection) {
       fetchStudents();
+
     }
   }, [selectedSchoolpk, selectedClass, selectedSection, activeTab]);
 
@@ -85,7 +91,7 @@ const PrimaryScreening = () => {
       setStudents(testedStudents);
       setFilteredStudents(testedStudents);
     }
-  }, [activeTab]);
+  }, [activeTab, remainingStudents, testedStudents]);
 
   useEffect(() => {
     if (searchQuery.trim() === '') {

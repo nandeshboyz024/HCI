@@ -243,14 +243,24 @@ WHERE
       if (existingSecondaryEntry.length > 0) {
         // Update the existing entry in the secondaryScreeningData table
         await sql`
-          UPDATE "secondaryScreeningData"
-          SET
-              "rightEyeVision" = ${reVision},
-              "leftEyeVision" = ${leVision},
-              "primaryTestResultStatus" = ${testResultStatus},
-              "status" = 0
-          WHERE
-              "satsId" = ${satsId};
+         UPDATE "secondaryScreeningData"
+SET
+    "rightEyeVision" = ${reVision},
+    "leftEyeVision" = ${leVision},
+    "primaryTestResultStatus" = ${testResultStatus},
+    "status" = 0,
+    "rightEyeSPH" = null,
+    "rightEyeCYL" = null,
+    "rightEyeAXIS" = null,
+    "leftEyeSPH" = null,
+    "leftEyeCYL" = null,
+    "leftEyeAXIS" = null,
+    "mobileNumber" = null,
+    "refractiveError" = null,
+    "spectaclesFrameCode" = null
+WHERE
+    "satsId" = ${satsId};
+
         `;
       } else {
         // Insert a new entry into the secondaryScreeningData table
@@ -266,7 +276,8 @@ WHERE
               ${reVision},
               ${leVision},
               ${testResultStatus},
-              0
+              0,
+              null
           );
         `;
       }
