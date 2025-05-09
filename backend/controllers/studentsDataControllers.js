@@ -126,11 +126,22 @@ export const uploadStudents = async (req, res) => {
 export const getTotalStudents = async (req, res) =>{
   try{
     const {schoolpk} = req.body;
-    const result = await sql`SELECT Count(*) AS "TotalStudents" FROM "Students" WHERE "Schoolpk"=${schoolpk}`;
+    const result1 = await sql`SELECT Count(*) AS "StudentCount" FROM "Students" WHERE "Schoolpk"=${schoolpk}`;
+    const result2 = await sql`SELECT COUNT(*) AS "StudentCount" FROM "Students" s JOIN "primaryScreeningData" psd ON s."StudentId" = psd."satsId" WHERE s."Schoolpk" = ${schoolpk} AND psd."status" = 1;`;
+    const result3 = await sql`SELECT COUNT(*) AS "StudentCount" FROM "Students" s JOIN "secondaryScreeningData" ssd ON s."StudentId" = ssd."satsId" WHERE s."Schoolpk" = ${schoolpk} AND ssd."status" = 1;`;
     res.json({
       success: true,
-      data: result[0],
+      data1: result1[0],
+      data2: result2[0],
+      data3: result3[0]
     });
+
+   
+
+    // res.json({
+    //   success: true,
+    //   data: result[0].studentcount
+    // });
   }catch(err){
     console.log(err);
     return res.status(500).json({ message: 'Failed to fetch Total Students', error: err.message });

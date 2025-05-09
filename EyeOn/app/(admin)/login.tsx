@@ -12,6 +12,10 @@ export default function AdminLogin() {
   
   const handleLogin = async()=>{
     if(loading) return;
+    if (!username.trim() || !password.trim()) {
+      Alert.alert('Validation Error', 'Please enter both username and password.');
+      return;
+    }
     setLoading(true);
     try{
         const response = await fetch(`${API_URL}/varify-admin`, {

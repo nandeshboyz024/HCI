@@ -32,6 +32,8 @@ export default function SchoolDetails() {
 
   const [school, setSchool] = useState<SchoolObj | null>(null);
   const [totalStudents, setTotalStudents] = useState<number | null>(null);
+  const [primaryScreenedStudents, setPrimaryScreenedStudents] = useState<number | null>(null);
+  const [secondaryScreenedStudents, setSecondaryScreenedStudents] = useState<number | null>(null);
   const [uploading, setUploading] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
 
@@ -59,7 +61,11 @@ export default function SchoolDetails() {
           body: JSON.stringify({ schoolpk }),
         });
         const res = await response.json();
-        if (res.success) setTotalStudents(res.data.TotalStudents);
+        if (res.success) {
+          setTotalStudents(res.data1.StudentCount);
+          setPrimaryScreenedStudents(res.data2.StudentCount);
+          setSecondaryScreenedStudents(res.data3.StudentCount);
+        }
       } catch (err) {
         console.error('Error fetching TotalStudents:', err);
       }
@@ -180,24 +186,7 @@ export default function SchoolDetails() {
       </Modal>
 
       <Text style={styles.schoolName}>{schoolName}</Text>
-      <Text style={styles.uploadedText}>
-        Total students uploaded :{' '}
-        <Text style={{ color: '#5a3ff0', fontWeight: 'bold' }}>
-          {totalStudents ?? 'Loading...'}
-        </Text>
-      </Text>
-
-      <TouchableOpacity style={styles.downloadBtn} onPress={handleDownload}>
-        <Ionicons
-          name="download-outline"
-          size={24}
-          color="white"
-          style={{ marginRight: 6 }}
-        />
-        <Text style={styles.downloadText}>Download</Text>
-      </TouchableOpacity>
-
-
+      
       <TouchableOpacity style={styles.uploadBtn} onPress={handleUpload}>
         <Ionicons name="add-circle-outline" size={20} color="black" />
         <Text style={styles.uploadText}>Upload Spreadsheet (.csv)</Text>
@@ -241,12 +230,47 @@ export default function SchoolDetails() {
             <Text>School Code: {school?.SchoolCode}</Text>
             <Text>Taluk: {taluk}</Text>
             <Text>District Code: {postalcode}</Text>
+            <Text>Distance: {school?.Distance}km</Text>
             <Text>Email: {school?.SchoolEmail}</Text>
           </View>
         </View>
       ) : (
         <Text>Loading school details...</Text>
       )}
+
+      
+
+      <Text style={styles.uploadedText}>
+        Total Uploaded Students :{' '}
+        <Text style={{ color: '#5a3ff0', fontWeight: 'bold' }}>
+          {totalStudents ?? 'Loading...'}
+        </Text>
+      </Text>
+
+      <Text style={styles.uploadedText}>
+        Primary Screened Students :{' '}
+        <Text style={{ color: '#5a3ff0', fontWeight: 'bold' }}>
+          {primaryScreenedStudents ?? 'Loading...'}
+        </Text>
+      </Text>
+
+      <Text style={styles.uploadedText}>
+        Secondary Screened Students :{' '}
+        <Text style={{ color: '#5a3ff0', fontWeight: 'bold' }}>
+          {secondaryScreenedStudents ?? 'Loading...'}
+        </Text>
+      </Text>
+
+      <TouchableOpacity style={styles.downloadBtn} onPress={handleDownload}>
+        <Ionicons
+          name="download-outline"
+          size={24}
+          color="white"
+          style={{ marginRight: 6 }}
+        />
+        <Text style={styles.downloadText}>Download</Text>
+      </TouchableOpacity>
+      
             <View style={styles.bottomNav}>
               <TouchableOpacity onPress={() => router.push('/schoolScreen')}>
                 <Ionicons name="home" size={28} color="black" />
