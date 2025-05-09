@@ -55,10 +55,14 @@ export const uploadStudents = async (req, res) => {
       let { StudentId, StudentName, ParentName, Age, Sex, Class: classId, Section} = row;
       StudentId = StudentId?.trim();
       Section = Section?.trim();
+      ParentName=ParentName?.trim();
+      StudentName = StudentName?.trim();
+      Age=Age?.trim();
+      classId=classId?.trim();
       if(Section===null || Section==="") Section="Others";
-      if(!StudentId) continue;
-      if(!StudentName) continue;
-      if(!ParentName) continue;
+      if(!StudentId || StudentId==="") continue;
+      if(!StudentName || StudentName==="") continue;
+      if(!ParentName || ParentName==="") continue;
       const parsedAge = parseInt(Age);
       if(isNaN(parsedAge)) continue;
       const parsedClass = parseInt(classId);
@@ -106,8 +110,6 @@ export const uploadStudents = async (req, res) => {
     const finalCount = parseInt(finalCountResult[0].count);
 
     const newStudentsAdded = finalCount - initialCount;
-    // console.log(newStudentsAdded);
-    // console.log(finalCount);
     return res.status(200).json({
       success:true,
       message: 'Data uploaded successfully',
