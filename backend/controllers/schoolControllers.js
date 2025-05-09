@@ -220,7 +220,7 @@ SET
     "leVision" = ${leVision},
     "status" = 1,
     "testResultStatus" = CASE
-            WHEN (${reVision} IN ('6/6', '6/7.5') AND ${reVision} IN ('6/6', '6/7.5')) THEN 'Normal'
+            WHEN (${reVision} IN ('6/6', '6/7.5') AND ${leVision} IN ('6/6', '6/7.5')) THEN 'Normal'
             ELSE 'Secondary Evaluation Required'
     END
 WHERE
@@ -276,8 +276,7 @@ WHERE
               ${reVision},
               ${leVision},
               ${testResultStatus},
-              0,
-              null
+              0
           );
         `;
       }

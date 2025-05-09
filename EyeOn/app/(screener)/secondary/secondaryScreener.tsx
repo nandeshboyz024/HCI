@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, FlatList, TextInput, ActivityIndicator, KeyboardAvoidingView, Platform } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { Ionicons } from '@expo/vector-icons'; // Import the icon library
-import Footer from '../footer'; // Import the Footer component
-import { API_URL } from '@env'; // Ensure you have the correct path to your .env file
+import { Ionicons } from '@expo/vector-icons';
+import Footer from '../footer';
+import { API_URL } from '@env';
 
 const SecondaryScreening = () => {
   const { selectedSchoolpk, selectedClass, selectedSection, selectedSchoolName } = useLocalSearchParams();
@@ -13,12 +13,12 @@ const SecondaryScreening = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [remainingStudents, setRemainingStudents] = useState([]);
   const [testedStudents, setTestedStudents] = useState([]);
-  const [activeTab, setActiveTab] = useState('remaining'); // 'remaining' or 'tested'
-  const [loading, setLoading] = useState(true); // Add loading state
+  const [activeTab, setActiveTab] = useState('remaining');
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchStudents = async () => {
-      setLoading(true); // Set loading to true before fetching data
+      setLoading(true);
       try {
         const response = await fetch(`${API_URL}/getStudentsForSecondaryScreening`, {
           method: 'POST',
@@ -29,7 +29,6 @@ const SecondaryScreening = () => {
             section: selectedSection,
           }),
         });
-        console.log("Response:", response);
 
         if (response.ok) {
           const result = await response.json();
@@ -39,8 +38,8 @@ const SecondaryScreening = () => {
             const tested = studentsData.filter(student => student.status === 1);
             setRemainingStudents(remaining);
             setTestedStudents(tested);
-            setStudents(remaining); // Default to remaining students
-            setFilteredStudents(remaining); // Default to remaining students
+            setStudents(remaining);
+            setFilteredStudents(remaining);
           } else {
             console.error('Failed to fetch students:', result.message);
           }
@@ -50,7 +49,7 @@ const SecondaryScreening = () => {
       } catch (error) {
         console.error('Error fetching students:', error);
       } finally {
-        setLoading(false); // Set loading to false after data is fetched
+        setLoading(false);
       }
     };
 
@@ -98,11 +97,9 @@ const SecondaryScreening = () => {
         studentLeftEyeCyl: student.leftEyeCYL,
         studentLeftEyeAxis: student.leftEyeAXIS,
         studentLeftEyeVision: student.leftEyeVision,
-
-        selectedRefractiveError: student.refractiveError || '', // Default to empty string if not available
-        selectedSpectaclesFrameCode: student.spectaclesFrameCode || '', // Default to empty string if not available
-        selectedMobileNumber: student.mobileNumber || '', // Default to empty string if not available
-
+        selectedRefractiveError: student.refractiveError || '',
+        selectedSpectaclesFrameCode: student.spectaclesFrameCode || '',
+        selectedMobileNumber: student.mobileNumber || '',
         selectedSchoolpk: selectedSchoolpk,
         selectedClass: selectedClass,
         selectedSection: selectedSection,
@@ -174,9 +171,22 @@ const SecondaryScreening = () => {
         <Text style={styles.title}>{selectedSchoolName}</Text>
         <Text style={styles.subtitle}>Class {selectedClass}</Text>
         <Text style={styles.subtitle}>Section {selectedSection}</Text>
-        <Text style={styles.info}>
-          <Text style={{ color: '#0497F3' }}>{testedStudents.length}</Text> / {remainingStudents.length + testedStudents.length}
-        </Text>
+
+        <View style={styles.statsContainer}>
+          {activeTab === 'remaining' && (
+            <Text style={styles.remainingStudentsText}>
+              Remaining Students: {remainingStudents.length}
+            </Text>
+          )}
+          {activeTab === 'tested' && (
+            <Text style={styles.remainingStudentsText}>
+              Tested Students: {testedStudents.length}
+            </Text>
+          )}
+          <Text style={styles.totalStudentsText}>
+            Total Students: {remainingStudents.length + testedStudents.length}
+          </Text>
+        </View>
 
         <View style={styles.buttonContainer}>
           <TouchableOpacity style={[styles.button, activeTab === 'remaining' && styles.activeButton]} onPress={() => handleTabPress('remaining')}>
@@ -242,10 +252,18 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     textAlign: 'center',
   },
-  info: {
-    fontSize: 16,
+  statsContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
     marginBottom: 20,
-    textAlign: 'center',
+  },
+  remainingStudentsText: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#007AFF'
+  },
+  totalStudentsText: {
+    fontSize: 16,
   },
   buttonContainer: {
     flexDirection: 'row',

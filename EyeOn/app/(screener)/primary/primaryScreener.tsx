@@ -8,8 +8,7 @@ import { API_URL } from '@env';
 const PrimaryScreening = () => {
   const { selectedSchoolpk, selectedClass, selectedSection, selectedSchoolName } = useLocalSearchParams();
   const router = useRouter();
-  // const testing = useState("");
-  
+
   const [students, setStudents] = useState([]);
   const [filteredStudents, setFilteredStudents] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
@@ -30,7 +29,6 @@ const PrimaryScreening = () => {
           body: JSON.stringify({ schoolpk: selectedSchoolpk, className: selectedClass, section: selectedSection })
         });
         console.log("response", response);
-        
 
         if (response.ok) {
           const result = await response.json();
@@ -73,13 +71,11 @@ const PrimaryScreening = () => {
         console.error('Error fetching students:', error);
       } finally {
         setLoading(false); // Set loading to false after data is fetched
-        // setActiveTab('tested');
       }
     };
 
     if (selectedSchoolpk && selectedClass && selectedSection) {
       fetchStudents();
-
     }
   }, [selectedSchoolpk, selectedClass, selectedSection, activeTab]);
 
@@ -177,9 +173,21 @@ const PrimaryScreening = () => {
         <Text style={styles.title}>{selectedSchoolName}</Text>
         <Text style={styles.subtitle}>Class {selectedClass}</Text>
         <Text style={styles.subtitle}>Section {selectedSection}</Text>
-        <Text style={styles.info}>
-          <Text style={{ color: '#0497F3' }}>{nOfTestedStudents}</Text> / {nOfRemainingStudents+nOfTestedStudents}
-        </Text>
+        <View style={styles.statsContainer}>
+          {activeTab === 'remaining' && (
+            <Text style={styles.remainingStudentsText}>
+              Remaining Students: {nOfRemainingStudents}
+            </Text>
+          )}
+          {activeTab === 'tested' && (
+            <Text style={styles.remainingStudentsText}>
+              Tested Students: {nOfTestedStudents}
+            </Text>
+          )}
+          <Text style={styles.totalStudentsText}>
+            Total Students: {nOfRemainingStudents + nOfTestedStudents}
+          </Text>
+        </View>
 
         <View style={styles.buttonContainer}>
           <TouchableOpacity style={[styles.button, activeTab === 'remaining' && styles.activeButton]} onPress={() => handleTabPress('remaining')}>
@@ -245,10 +253,19 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     textAlign: 'center',
   },
-  info: {
-    fontSize: 16,
+  statsContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
     marginBottom: 20,
-    textAlign: 'center',
+  },
+  remainingStudentsText: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#007AFF'
+  },
+  totalStudentsText: {
+    fontSize: 16,
+    // fontWeight: '500', // Light font weight
   },
   buttonContainer: {
     flexDirection: 'row',
