@@ -111,7 +111,7 @@ export default function SchoolDetails() {
       setUploading(false); // hide popup
       if(data.success) {
         setTotalStudents(data.totalRecords);
-        Alert.alert('Success',`${file.name} uploaded successfully!\n${data.newAddedRecords} New Entry Added.`);
+        Alert.alert('Success',`${file.name} uploaded successfully!\n${data.newAddedRecords} New Entry Added.\n${data.updatedRecords} Entry Updated.\n${data.skippedRecords} Entry Skipped.`);
       }
       else{
         if(data.message=='CSV columns do not match the expected order or names'){

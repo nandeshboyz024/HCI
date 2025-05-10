@@ -48,6 +48,9 @@ export const uploadStudents = async (req, res) => {
         actual: actualColumns.join(', ')
       });      
     }
+
+    let skipped = 0;
+    let nonSkipped = 0;
     const initialCountResult = await sql`SELECT COUNT(*) FROM "Students" WHERE "Schoolpk"=${schoolpk}`;
     const initialCount = parseInt(initialCountResult[0].count);
     // Process each record
@@ -60,13 +63,29 @@ export const uploadStudents = async (req, res) => {
       Age=Age?.trim();
       classId=classId?.trim();
       if(Section===null || Section==="") Section="Others";
-      if(!StudentId || StudentId==="") continue;
-      if(!StudentName || StudentName==="") continue;
-      if(!ParentName || ParentName==="") continue;
+      if(!StudentId || StudentId==="") {
+        skipped++;
+        continue;
+      }
+      if(!StudentName || StudentName==="") {
+        skipped++;
+        continue;
+      }
+      if(!ParentName || ParentName==="") {
+        skipped++;
+        continue;
+      }
       const parsedAge = parseInt(Age);
-      if(isNaN(parsedAge)) continue;
+      if(isNaN(parsedAge)) {
+        skipped++;
+        continue;
+      }
       const parsedClass = parseInt(classId);
-      if(isNaN(parsedClass)) continue;
+      if(isNaN(parsedClass)) {
+        skipped++;
+        continue;
+      }
+      nonSkipped++;
       // 1. UPSERT into "Students"
       await sql`
         INSERT INTO "Students" 
@@ -110,11 +129,14 @@ export const uploadStudents = async (req, res) => {
     const finalCount = parseInt(finalCountResult[0].count);
 
     const newStudentsAdded = finalCount - initialCount;
+    const updatedStudents = nonSkipped-newStudentsAdded;
     return res.status(200).json({
       success:true,
       message: 'Data uploaded successfully',
-      newAddedRecords: newStudentsAdded, 
-      totalRecords: finalCount
+      newAddedRecords: newStudentsAdded,
+      updatedRecords: updatedStudents,
+      totalRecords: finalCount,
+      skippedRecords:skipped
     });
 
   } catch (err) {
@@ -135,13 +157,6 @@ export const getTotalStudents = async (req, res) =>{
       data2: result2[0],
       data3: result3[0]
     });
-
-   
-
-    // res.json({
-    //   success: true,
-    //   data: result[0].studentcount
-    // });
   }catch(err){
     console.log(err);
     return res.status(500).json({ message: 'Failed to fetch Total Students', error: err.message });
